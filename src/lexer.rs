@@ -277,7 +277,7 @@ impl<'a> Lexer<'a> {
                                     span: Span { from, to: self.loc },
                                     text: orig_cursor.slice_between(next).unwrap(),
                                 });
-                                self.cursor = cursor;
+                                self.cursor = next;
                                 return true;
                             } else if gc.base_char() == '\n' {
                                 self.loc.row += 1;
@@ -313,13 +313,16 @@ impl<'a> Lexer<'a> {
     fn number(&mut self) -> bool {
         lazy_static! {
             static ref RE: Regex = Regex::new(&format!(
-                "^({}|{}|{}|{}|{}|{}|{})",
+                "^({}|{}|{}|{}|{}|{}|{}|{}|{})",
                 // octal_number
                 "([1-9][0-9_]*)'[sS]?[oO][0-7xXzZ][0-7xXzZ_]*", // [ size ] octal_base octal_value
                 // binary_number
                 "([1-9][0-9_]*)'[sS]?[bB][01xXzZ][01xXzZ_]*", // [ size ] binary_base binary_value
                 // hex_number
                 "([1-9][0-9_]*)'[sS]?[hH][0-9a-fA-FxXzZ][0-9a-fA-FxXzZ_]*", // [ size ] hex_base hex_value
+                // real_number
+                "[0-9][0-9_]*(.[0-9][0-9_]*)?[eE][+-]?[0-9][0-9_]*", // unsigned_number [ . unsigned_number ] exp [ sign ] unsigned_number
+                "[0-9][0-9_]*.[0-9][0-9_]*", // unsigned_number . unsigned_number
                 // decimal_number
                 "([1-9][0-9_]*)'[sS]?[dD][0-9][0-9_]*", // [ size ] decimal_base unsigned_number
                 "([1-9][0-9_]*)'[sS]?[dD][xX]_*",       // [ size ] decimal_base x_digit { _ }
@@ -508,6 +511,12 @@ mod tests {
         assert_eq!(lexer.tokens[0].text, "123'sh111bbb");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 2 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 13 });
+
+        let lexer = Lexer::lex("1.0 1.0e+30");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 2);
+        assert_eq!(lexer.tokens[0].text, "1.0");
+        assert_eq!(lexer.tokens[1].text, "1.0e+30");
     }
 
     #[test]
