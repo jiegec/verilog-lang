@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
 use crate::diagnostic::Diagnostic;
 use lazy_static::lazy_static;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use strcursor::StrCursor;
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -165,23 +165,36 @@ pub enum Token {
     Semicolon,
     Dot,
 
-    // Operators
-    OpEqual,
-    OpAt,
-    OpDivide,
-    OpMinus,
-    OpNot,
-    OpPlus,
-    OpInvert,
-    OpMultiply,
-    OpChoice,
-    OpEqualTo,
-    OpAssign,
-    OpLessThan,
-    OpGreaterThan,
-    OpLeftShift,
-    OpGreaterEqual,
-    OpAnd,
+    // Operators, Table 9
+    OpPlus,            // +
+    OpMinus,           // -
+    OpMultiply,        // *
+    OpDivide,          // /
+    OpPow,             // **
+    OpMod,             // %
+    OpGreaterThan,     // >
+    OpGreaterEqual,    // >=
+    OpLessThan,        // <
+    OpLessEqual,       // <=
+    OpNot,             // !
+    OpAnd,             // &&
+    OpOr,              // ||
+    OpEqual,           // ==
+    OpInequal,         // !=
+    OpCaseEqual,       // ===
+    OpCaseInequal,     // !==
+    OpBitNeg,          // ~
+    OpBitAnd,          // &
+    OpBitOr,           // |
+    OpBitXor,          // ^
+    OpBitEquiv1,       // ^~
+    OpBitEquiv2,       // ~^
+    OpNand,            // ~&
+    OpNor,             // ~|
+    OpLeftShift,       // <<
+    OpRightShift,      // >>
+    OpArithLeftShift,  // <<<
+    OpArithRightShift, // >>>
 
     None,
 }
@@ -342,6 +355,72 @@ impl<'a> Lexer<'a> {
         false
     }
 
+    // A.8.6 Operators
+    fn operator(&mut self) -> bool {
+        let mut first = ' ';
+        let mut second = ' ';
+        let mut third = ' ';
+        if let Some((gc, next)) = self.cursor.next() {
+            first = gc.base_char();
+            if let Some((gc, next)) = next.next() {
+                second = gc.base_char();
+                if let Some((gc, _next)) = next.next() {
+                    third = gc.base_char();
+                }
+            }
+        }
+        let (token, len) = match (first, second, third) {
+            ('=', '=', '=') => (Token::OpCaseEqual, 3),
+            ('!', '=', '=') => (Token::OpCaseInequal, 3),
+            ('>', '>', '>') => (Token::OpArithRightShift, 3),
+            ('<', '<', '<') => (Token::OpArithLeftShift, 3),
+            ('~', '&', _) => (Token::OpNand, 2),
+            ('~', '|', _) => (Token::OpNor, 2),
+            ('~', '^', _) => (Token::OpBitEquiv2, 2),
+            ('^', '~', _) => (Token::OpBitEquiv1, 2),
+            ('=', '=', _) => (Token::OpEqual, 2),
+            ('!', '=', _) => (Token::OpInequal, 2),
+            ('&', '&', _) => (Token::OpAnd, 2),
+            ('|', '|', _) => (Token::OpOr, 2),
+            ('*', '*', _) => (Token::OpPow, 2),
+            ('<', '=', _) => (Token::OpLessEqual, 2),
+            ('>', '=', _) => (Token::OpGreaterEqual, 2),
+            ('>', '>', _) => (Token::OpRightShift, 2),
+            ('<', '<', _) => (Token::OpLeftShift, 2),
+            ('+', _, _) => (Token::OpPlus, 1),
+            ('-', _, _) => (Token::OpMinus, 1),
+            ('!', _, _) => (Token::OpNot, 1),
+            ('&', _, _) => (Token::OpBitAnd, 1),
+            ('|', _, _) => (Token::OpBitOr, 1),
+            ('^', _, _) => (Token::OpBitXor, 1),
+            ('*', _, _) => (Token::OpMultiply, 1),
+            ('/', _, _) => (Token::OpDivide, 1),
+            ('%', _, _) => (Token::OpMod, 1),
+            ('<', _, _) => (Token::OpLessThan, 1),
+            ('>', _, _) => (Token::OpGreaterThan, 1),
+            ('~', _, _) => (Token::OpBitNeg, 1),
+            _ => {
+                return false;
+            }
+        };
+        let to = Location {
+            row: self.loc.row,
+            col: self.loc.col + len - 1,
+        };
+        let mut cursor = self.cursor;
+        for _ in 0..len {
+            cursor = cursor.next().unwrap().1;
+        }
+        self.tokens.push(ParsedToken {
+            span: Span { from: self.loc, to },
+            token,
+            text: self.cursor.slice_between(cursor).unwrap(),
+        });
+        self.cursor = cursor;
+        self.loc.col += len;
+        true
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -357,6 +436,11 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 '0'..='9' | '\'' if self.number() => {
+                    continue;
+                }
+                '+' | '-' | '!' | '~' | '&' | '|' | '^' | '*' | '/' | '%' | '=' | '<' | '>'
+                    if self.operator() =>
+                {
                     continue;
                 }
                 _ => {
@@ -424,5 +508,18 @@ mod tests {
         assert_eq!(lexer.tokens[0].text, "123'sh111bbb");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 2 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 13 });
+    }
+
+    #[test]
+    fn operator() {
+        let lexer = Lexer::lex("+~|<<<^~-");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 5);
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[1].span.from, Location { row: 0, col: 1 });
+        assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 2 });
+        assert_eq!(lexer.tokens[2].span.from, Location { row: 0, col: 3 });
+        assert_eq!(lexer.tokens[2].span.to, Location { row: 0, col: 5 });
     }
 }
