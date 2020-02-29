@@ -228,10 +228,13 @@ impl<'a> Lexer<'a> {
                         // one line comment
                         let from = self.loc;
                         self.loc.col += 1;
+                        let mut to = self.loc;
+                        self.loc.col += 1;
                         while let Some((gc, next)) = cursor.next() {
                             if gc.base_char() == '\n' {
                                 break;
                             }
+                            to = self.loc;
                             self.loc.col += 1;
                             cursor = next;
                         }
@@ -239,11 +242,47 @@ impl<'a> Lexer<'a> {
                         // end of line
                         self.tokens.push(ParsedToken {
                             token: Token::Comment,
-                            span: Span { from, to: self.loc },
+                            span: Span { from, to },
                             text: orig_cursor.slice_between(cursor).unwrap(),
                         });
-                        self.loc.row += 1;
-                        self.loc.col = 0;
+                        self.cursor = cursor;
+                        return true;
+                    } else if gc2.base_char() == '*' {
+                        // multi line comment
+                        let from = self.loc;
+                        self.loc.col += 2;
+                        let mut prev_ch = ' ';
+                        while let Some((gc, next)) = cursor.next() {
+                            if gc.base_char() == '/' && prev_ch == '*' {
+                                // end of comment
+                                self.tokens.push(ParsedToken {
+                                    token: Token::Comment,
+                                    span: Span { from, to: self.loc },
+                                    text: orig_cursor.slice_between(next).unwrap(),
+                                });
+                                self.cursor = cursor;
+                                return true;
+                            } else if gc.base_char() == '\n' {
+                                self.loc.row += 1;
+                                self.loc.col = 0;
+                            } else {
+                                self.loc.col += 1;
+                            }
+                            prev_ch = gc.base_char();
+                            cursor = next;
+                        }
+
+                        // not closed until end of input
+                        let to = Location {
+                            row: self.loc.row,
+                            col: self.loc.col - 1,
+                        };
+                        self.tokens.push(ParsedToken {
+                            token: Token::Comment,
+                            span: Span { from, to },
+                            text: orig_cursor.slice_between(cursor).unwrap(),
+                        });
+                        self.diag(from, self.loc, format!("Multiline comment not closed"));
                         self.cursor = cursor;
                         return true;
                     }
@@ -295,5 +334,20 @@ mod tests {
         let lexer = Lexer::lex("// woc woc\nsomething // abcde");
         println!("{:?}", lexer.tokens);
         assert!(lexer.tokens.len() > 0);
+        assert_eq!(lexer.tokens[0].text, "// woc woc");
+
+        let lexer = Lexer::lex("/* woc woc\nsomething */");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].text, "/* woc woc\nsomething */");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 11 });
+
+        let lexer = Lexer::lex("/* not closed\ncomment ");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens[0].text, "/* not closed\ncomment ");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 7 });
+        assert_eq!(lexer.diag.len(), 1);
     }
 }
