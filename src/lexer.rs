@@ -477,6 +477,49 @@ impl<'a> Lexer<'a> {
         false
     }
 
+    fn identifier_keyword(&mut self) -> bool {
+        let mut cursor = self.cursor;
+        let from = self.loc;
+        let mut loc = self.loc;
+        while let Some((gc, next)) = cursor.next() {
+            match gc.base_char() {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '$' | '_' => {
+                    cursor = next;
+                    loc.col += 1;
+                }
+                _ => {
+                    // end
+                    let slice = self.cursor.slice_between(cursor).unwrap();
+                    // TODO: handle keyword
+
+                    self.loc = loc;
+                    loc.col -= 1;
+                    self.cursor = cursor;
+                    self.tokens.push(ParsedToken {
+                        span: Span { from, to: loc },
+                        token: Token::Identifier,
+                        text: slice,
+                    });
+                    return true;
+                }
+            }
+        }
+
+        let slice = self.cursor.slice_between(cursor).unwrap();
+        // TODO: handle keyword
+
+        // end of input
+        self.loc = loc;
+        loc.col -= 1;
+        self.cursor = cursor;
+        self.tokens.push(ParsedToken {
+            span: Span { from, to: loc },
+            token: Token::Identifier,
+            text: slice,
+        });
+        true
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -500,6 +543,9 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 '"' if self.string() => {
+                    continue;
+                }
+                'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
                     continue;
                 }
                 _ => {
@@ -597,5 +643,24 @@ mod tests {
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 18 });
         assert_eq!(lexer.diag.len(), 1); // \r
+    }
+
+    #[test]
+    fn identifier() {
+        let lexer = Lexer::lex(r#""abc"abc"#);
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 2);
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 4 });
+        assert_eq!(lexer.tokens[1].span.from, Location { row: 0, col: 5 });
+        assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 7 });
+
+        let lexer = Lexer::lex(r#"abc "abc""#);
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 2);
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 2 });
+        assert_eq!(lexer.tokens[1].span.from, Location { row: 0, col: 4 });
+        assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 8 });
     }
 }
