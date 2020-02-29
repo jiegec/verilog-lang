@@ -154,18 +154,19 @@ pub enum Token {
     Xor,
 
     // Delimiter
-    Sharp,
+    Sharp, // #
     LParen, // ()
     RParen,
     LBracket, // []
     RBracket,
     LBraces, // {}
     RBraces,
-    Colon,
-    Comma,
-    Semicolon,
-    Dot,
-    Equal,
+    Colon, // :
+    Comma, // ,
+    Semicolon, // ;
+    Dot, // .
+    Equal, // =
+    At, // @
 
     // Operators, Table 9
     OpPlus,            // +
@@ -538,11 +539,14 @@ impl<'a> Lexer<'a> {
                 ')' => Token::RParen,
                 '[' => Token::LBracket,
                 ']' => Token::RBracket,
+                '{' => Token::LBraces,
+                '}' => Token::RBraces,
                 ':' => Token::Colon,
                 ',' => Token::Comma,
                 ';' => Token::Semicolon,
                 '.' => Token::Dot,
                 '=' => Token::Equal,
+                '@' => Token::At,
                 _ => return false,
             };
             self.tokens.push(ParsedToken {
@@ -627,7 +631,7 @@ impl<'a> Lexer<'a> {
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
                     continue;
                 }
-                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '='
+                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@'
                     if self.delimiter() =>
                 {
                     continue;
