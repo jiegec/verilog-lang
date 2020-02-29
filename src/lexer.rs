@@ -167,6 +167,7 @@ pub enum Token {
     Dot, // .
     Equal, // =
     At, // @
+    Question, // ?
 
     // Operators, Table 9
     OpPlus,            // +
@@ -331,18 +332,18 @@ impl<'a> Lexer<'a> {
             static ref RE: Regex = Regex::new(&format!(
                 "^({}|{}|{}|{}|{}|{}|{}|{}|{})",
                 // octal_number
-                "([1-9][0-9_]*)'[sS]?[oO][0-7xXzZ][0-7xXzZ_]*", // [ size ] octal_base octal_value
+                "([1-9][0-9_]*)?'[sS]?[oO][0-7xXzZ][0-7xXzZ_]*", // [ size ] octal_base octal_value
                 // binary_number
-                "([1-9][0-9_]*)'[sS]?[bB][01xXzZ][01xXzZ_]*", // [ size ] binary_base binary_value
+                "([1-9][0-9_]*)?'[sS]?[bB][01xXzZ][01xXzZ_]*", // [ size ] binary_base binary_value
                 // hex_number
-                "([1-9][0-9_]*)'[sS]?[hH][0-9a-fA-FxXzZ][0-9a-fA-FxXzZ_]*", // [ size ] hex_base hex_value
+                "([1-9][0-9_]*)?'[sS]?[hH][0-9a-fA-FxXzZ][0-9a-fA-FxXzZ_]*", // [ size ] hex_base hex_value
                 // real_number
                 "[0-9][0-9_]*(.[0-9][0-9_]*)?[eE][+-]?[0-9][0-9_]*", // unsigned_number [ . unsigned_number ] exp [ sign ] unsigned_number
                 "[0-9][0-9_]*.[0-9][0-9_]*", // unsigned_number . unsigned_number
                 // decimal_number
-                "([1-9][0-9_]*)'[sS]?[dD][0-9][0-9_]*", // [ size ] decimal_base unsigned_number
-                "([1-9][0-9_]*)'[sS]?[dD][xX]_*",       // [ size ] decimal_base x_digit { _ }
-                "([1-9][0-9_]*)'[sS]?[dD][zZ?]_*",      // [ size ] decimal_base z_digit { _ }
+                "([1-9][0-9_]*)?'[sS]?[dD][0-9][0-9_]*", // [ size ] decimal_base unsigned_number
+                "([1-9][0-9_]*)?'[sS]?[dD][xX]_*",       // [ size ] decimal_base x_digit { _ }
+                "([1-9][0-9_]*)?'[sS]?[dD][zZ?]_*",      // [ size ] decimal_base z_digit { _ }
                 "[0-9][0-9_]*",                         // unsigned_number
             ))
             .unwrap();
@@ -547,6 +548,7 @@ impl<'a> Lexer<'a> {
                 '.' => Token::Dot,
                 '=' => Token::Equal,
                 '@' => Token::At,
+                '?' => Token::Question,
                 _ => return false,
             };
             self.tokens.push(ParsedToken {
@@ -631,7 +633,7 @@ impl<'a> Lexer<'a> {
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
                     continue;
                 }
-                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@'
+                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@' | '?'
                     if self.delimiter() =>
                 {
                     continue;
