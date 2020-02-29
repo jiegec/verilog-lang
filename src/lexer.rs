@@ -424,6 +424,59 @@ impl<'a> Lexer<'a> {
         true
     }
 
+    // 2.6 Strings
+    fn string(&mut self) -> bool {
+        if let Some((gc, next)) = self.cursor.next() {
+            if gc.base_char() == '"' {
+                let mut cursor = next;
+                let mut escaping = false;
+                let from = self.loc;
+                let mut loc = self.loc;
+                let mut escape_loc = Location { row: 0, col: 0 };
+                loc.col += 1;
+                while let Some((gc, next)) = cursor.next() {
+                    match (gc.base_char(), escaping) {
+                        ('\\', false) => {
+                            escaping = true;
+                            escape_loc = loc;
+                        }
+                        ('n', true) | ('t', true) | ('\\', true) | ('"', true) => {
+                            escaping = false;
+                        }
+                        (ch, true) if ch >= '0' && ch <= '7' => {
+                            escaping = false;
+                        }
+                        (ch, true) => {
+                            // bad escape character
+                            self.diag(
+                                escape_loc,
+                                loc,
+                                format!("Unrecognized escape character: {}", ch),
+                            );
+                            escaping = false;
+                        }
+                        ('"', false) => {
+                            // end
+                            self.tokens.push(ParsedToken {
+                                span: Span { from, to: loc },
+                                token: Token::String,
+                                text: self.cursor.slice_between(next).unwrap(),
+                            });
+                            self.cursor = next;
+                            self.loc = loc;
+                            self.loc.col += 1;
+                            return true;
+                        }
+                        _ => {}
+                    }
+                    loc.col += 1;
+                    cursor = next;
+                }
+            }
+        }
+        false
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -444,6 +497,9 @@ impl<'a> Lexer<'a> {
                 '+' | '-' | '!' | '~' | '&' | '|' | '^' | '*' | '/' | '%' | '=' | '<' | '>'
                     if self.operator() =>
                 {
+                    continue;
+                }
+                '"' if self.string() => {
                     continue;
                 }
                 _ => {
@@ -530,5 +586,16 @@ mod tests {
         assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 2 });
         assert_eq!(lexer.tokens[2].span.from, Location { row: 0, col: 3 });
         assert_eq!(lexer.tokens[2].span.to, Location { row: 0, col: 5 });
+    }
+
+    #[test]
+    fn string() {
+        let lexer = Lexer::lex(r#""abcde\t\n\r\\\"\"""#);
+        println!("{:?}", lexer.tokens);
+        println!("{:?}", lexer.diag);
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 18 });
+        assert_eq!(lexer.diag.len(), 1); // \r
     }
 }
