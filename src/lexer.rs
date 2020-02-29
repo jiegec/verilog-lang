@@ -2,6 +2,7 @@ use crate::diagnostic::Diagnostic;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use strcursor::StrCursor;
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -213,6 +214,19 @@ pub struct Lexer<'a> {
     loc: Location,
     pub tokens: Vec<ParsedToken<'a>>,
     pub diag: Vec<Diagnostic>,
+}
+
+fn keyword_map() -> HashMap<String, Token> {
+    use Token::*;
+    let mut map = HashMap::new();
+    map.insert(format!("always"), Always);
+    map.insert(format!("always_comb"), AlwaysComb);
+    map.insert(format!("always_ff"), AlwaysFf);
+    map.insert(format!("and"), And);
+    map.insert(format!("assign"), Assign);
+    map.insert(format!("automatic"), Automatic);
+    // TODO: all keywords
+    map
 }
 
 impl<'a> Lexer<'a> {
@@ -478,6 +492,9 @@ impl<'a> Lexer<'a> {
     }
 
     fn identifier_keyword(&mut self) -> bool {
+        lazy_static! {
+            static ref KEYWORD: HashMap<String, Token> = keyword_map();
+        }
         let mut cursor = self.cursor;
         let from = self.loc;
         let mut loc = self.loc;
@@ -489,32 +506,22 @@ impl<'a> Lexer<'a> {
                 }
                 _ => {
                     // end
-                    let slice = self.cursor.slice_between(cursor).unwrap();
-                    // TODO: handle keyword
-
-                    self.loc = loc;
-                    loc.col -= 1;
-                    self.cursor = cursor;
-                    self.tokens.push(ParsedToken {
-                        span: Span { from, to: loc },
-                        token: Token::Identifier,
-                        text: slice,
-                    });
-                    return true;
+                    break;
                 }
             }
         }
 
-        let slice = self.cursor.slice_between(cursor).unwrap();
-        // TODO: handle keyword
-
         // end of input
+        let slice = self.cursor.slice_between(cursor).unwrap();
+
         self.loc = loc;
         loc.col -= 1;
         self.cursor = cursor;
+        let token = *KEYWORD.get(slice).unwrap_or(&Token::Identifier);
+
         self.tokens.push(ParsedToken {
             span: Span { from, to: loc },
-            token: Token::Identifier,
+            token,
             text: slice,
         });
         true
@@ -662,5 +669,25 @@ mod tests {
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 2 });
         assert_eq!(lexer.tokens[1].span.from, Location { row: 0, col: 4 });
         assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 8 });
+    }
+
+    #[test]
+    fn keyword() {
+        let lexer = Lexer::lex(r#"and andd an always"#);
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 4);
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 2 });
+        assert_eq!(lexer.tokens[0].token, Token::And);
+        assert_eq!(lexer.tokens[1].span.from, Location { row: 0, col: 4 });
+        assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 7 });
+        assert_eq!(lexer.tokens[1].token, Token::Identifier);
+        assert_eq!(lexer.tokens[2].span.from, Location { row: 0, col: 9 });
+        assert_eq!(lexer.tokens[2].span.to, Location { row: 0, col: 10 });
+        assert_eq!(lexer.tokens[2].token, Token::Identifier);
+        assert_eq!(lexer.tokens[3].span.from, Location { row: 0, col: 12 });
+        assert_eq!(lexer.tokens[3].span.to, Location { row: 0, col: 17 });
+        assert_eq!(lexer.tokens[3].token, Token::Always);
+
     }
 }
