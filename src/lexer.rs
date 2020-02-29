@@ -165,6 +165,7 @@ pub enum Token {
     Comma,
     Semicolon,
     Dot,
+    Equal,
 
     // Operators, Table 9
     OpPlus,            // +
@@ -541,6 +542,7 @@ impl<'a> Lexer<'a> {
                 ',' => Token::Comma,
                 ';' => Token::Semicolon,
                 '.' => Token::Dot,
+                '=' => Token::Equal,
                 _ => return false,
             };
             self.tokens.push(ParsedToken {
@@ -625,7 +627,7 @@ impl<'a> Lexer<'a> {
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
                     continue;
                 }
-                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.'
+                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '='
                     if self.delimiter() =>
                 {
                     continue;
