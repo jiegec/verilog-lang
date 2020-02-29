@@ -558,6 +558,45 @@ impl<'a> Lexer<'a> {
         false
     }
 
+    // 2.7.5 Compiler directives
+    fn directive(&mut self) -> bool {
+        if let Some((gc, next)) = self.cursor.next() {
+            if gc.base_char() == '`' {
+                self.loc.col += 1;
+                let mut cursor = next;
+                let from = self.loc;
+                let mut loc = self.loc;
+                while let Some((gc, next)) = cursor.next() {
+                    match gc.base_char() {
+                        'a'..='z' | 'A'..='Z' | '0'..='9' | '$' | '_' => {
+                            cursor = next;
+                            loc.col += 1;
+                        }
+                        _ => {
+                            // end
+                            break;
+                        }
+                    }
+                }
+
+                // end of input
+                let slice = self.cursor.slice_between(cursor).unwrap();
+
+                self.loc = loc;
+                loc.col -= 1;
+                self.cursor = cursor;
+
+                self.tokens.push(ParsedToken {
+                    span: Span { from, to: loc },
+                    token: Token::Directive,
+                    text: slice,
+                });
+                return true;
+            }
+        }
+        false
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -589,6 +628,9 @@ impl<'a> Lexer<'a> {
                 '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.'
                     if self.delimiter() =>
                 {
+                    continue;
+                }
+                '`' if self.directive() => {
                     continue;
                 }
                 _ => {
