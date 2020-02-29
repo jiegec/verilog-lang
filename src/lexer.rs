@@ -198,8 +198,8 @@ pub struct Lexer<'a> {
     input: &'a str,
     cursor: StrCursor<'a>,
     loc: Location,
-    tokens: Vec<ParsedToken<'a>>,
-    diag: Vec<Diagnostic>,
+    pub tokens: Vec<ParsedToken<'a>>,
+    pub diag: Vec<Diagnostic>,
 }
 
 impl<'a> Lexer<'a> {
