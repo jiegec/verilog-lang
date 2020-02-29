@@ -10,3 +10,4 @@ edition = "2018"
 strcursor = "0.2"
 regex = "1"
 lazy_static = "1.4"
+serde = { version = "1.0", features = ["derive"] }

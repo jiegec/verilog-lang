@@ -1,21 +1,22 @@
+use serde::{Serialize, Deserialize};
 use crate::diagnostic::Diagnostic;
 use lazy_static::lazy_static;
 use regex::Regex;
 use strcursor::StrCursor;
 
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct Location {
     pub row: usize,
     pub col: usize,
 }
 
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct Span {
     pub from: Location,
     pub to: Location,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub enum Token {
     // Types
     Number,
@@ -185,7 +186,7 @@ pub enum Token {
     None,
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct ParsedToken<'a> {
     pub span: Span,
     pub token: Token,
