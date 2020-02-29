@@ -1,4 +1,4 @@
-use crate::diagnostic::Diagnostic;
+use crate::diagnostic::{Diagnostic, Message, Severity};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -154,20 +154,20 @@ pub enum Token {
     Xor,
 
     // Delimiter
-    Sharp, // #
+    Sharp,  // #
     LParen, // ()
     RParen,
     LBracket, // []
     RBracket,
     LBraces, // {}
     RBraces,
-    Colon, // :
-    Comma, // ,
+    Colon,     // :
+    Comma,     // ,
     Semicolon, // ;
-    Dot, // .
-    Equal, // =
-    At, // @
-    Question, // ?
+    Dot,       // .
+    Equal,     // =
+    At,        // @
+    Question,  // ?
 
     // Operators, Table 9
     OpPlus,            // +
@@ -245,10 +245,19 @@ impl<'a> Lexer<'a> {
         lexer
     }
 
-    fn diag(&mut self, from: Location, to: Location, msg: String) {
+    fn err(&mut self, from: Location, to: Location, msg: Message) {
         self.diag.push(Diagnostic {
             pos: Span { from, to },
-            message: msg,
+            msg,
+            severity: Severity::Error,
+        });
+    }
+
+    fn warn(&mut self, from: Location, to: Location, msg: Message) {
+        self.diag.push(Diagnostic {
+            pos: Span { from, to },
+            msg,
+            severity: Severity::Warning,
         });
     }
 
@@ -316,7 +325,7 @@ impl<'a> Lexer<'a> {
                             span: Span { from, to },
                             text: orig_cursor.slice_between(cursor).unwrap(),
                         });
-                        self.diag(from, self.loc, format!("Multiline comment not closed"));
+                        self.err(from, self.loc, Message::MultilineCommentUnclosed);
                         self.cursor = cursor;
                         return true;
                     }
@@ -465,11 +474,7 @@ impl<'a> Lexer<'a> {
                         }
                         (ch, true) => {
                             // bad escape character
-                            self.diag(
-                                escape_loc,
-                                loc,
-                                format!("Unrecognized escape character: {}", ch),
-                            );
+                            self.warn(escape_loc, loc, Message::UnrecognizedEscapeCharacter(ch));
                             escaping = false;
                         }
                         ('"', false) => {
@@ -633,7 +638,8 @@ impl<'a> Lexer<'a> {
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
                     continue;
                 }
-                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@' | '?'
+                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@'
+                | '?'
                     if self.delimiter() =>
                 {
                     continue;
@@ -642,7 +648,7 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 _ => {
-                    self.diag(self.loc, self.loc, format!("Unexpected char: {}", gc));
+                    self.err(self.loc, self.loc, Message::UnexpectedChar(gc.base_char()));
                 }
             }
             self.loc.col += 1;
