@@ -1,4 +1,6 @@
 use crate::diagnostic::Diagnostic;
+use lazy_static::lazy_static;
+use regex::Regex;
 use strcursor::StrCursor;
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -219,6 +221,7 @@ impl<'a> Lexer<'a> {
         });
     }
 
+    // A.9.2 Comments
     fn comment(&mut self) -> bool {
         let orig_cursor = self.cursor;
         if let Some((gc1, next)) = self.cursor.next() {
@@ -292,6 +295,52 @@ impl<'a> Lexer<'a> {
         false
     }
 
+    // A.8.7 Numbers
+    fn number(&mut self) -> bool {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(&format!(
+                "^({}|{}|{}|{}|{}|{}|{})",
+                // octal_number
+                "([1-9][0-9_]*)'[sS]?[oO][0-7xXzZ][0-7xXzZ_]*", // [ size ] octal_base octal_value
+                // binary_number
+                "([1-9][0-9_]*)'[sS]?[bB][01xXzZ][01xXzZ_]*", // [ size ] binary_base binary_value
+                // hex_number
+                "([1-9][0-9_]*)'[sS]?[hH][0-9a-fA-FxXzZ][0-9a-fA-FxXzZ_]*", // [ size ] hex_base hex_value
+                // decimal_number
+                "([1-9][0-9_]*)'[sS]?[dD][0-9][0-9_]*", // [ size ] decimal_base unsigned_number
+                "([1-9][0-9_]*)'[sS]?[dD][xX]_*",       // [ size ] decimal_base x_digit { _ }
+                "([1-9][0-9_]*)'[sS]?[dD][zZ?]_*",      // [ size ] decimal_base z_digit { _ }
+                "[0-9][0-9_]*",                         // unsigned_number
+            ))
+            .unwrap();
+        }
+        let s = self.cursor.slice_after();
+        if let Some(m) = RE.find(s) {
+            assert_eq!(m.start(), 0);
+            let from = self.loc;
+            let orig_pos = self.cursor.byte_pos();
+            let orig_cursor = self.cursor;
+            let new_pos = orig_pos + m.end();
+            let new_cursor = StrCursor::new_at_left_of_byte_pos(self.input, new_pos);
+            let mut cursor = self.cursor;
+            while let Some((_, next)) = cursor.next() {
+                if next == new_cursor {
+                    self.tokens.push(ParsedToken {
+                        token: Token::Comment,
+                        span: Span { from, to: self.loc },
+                        text: orig_cursor.slice_between(next).unwrap(),
+                    });
+                    self.loc.col += 1;
+                    self.cursor = next;
+                    return true;
+                }
+                self.loc.col += 1;
+                cursor = next;
+            }
+        }
+        false
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -303,10 +352,11 @@ impl<'a> Lexer<'a> {
                         continue;
                     }
                 }
-                '/' => {
-                    if self.comment() {
-                        continue;
-                    }
+                '/' if self.comment() => {
+                    continue;
+                }
+                '0'..='9' | '\'' if self.number() => {
+                    continue;
                 }
                 _ => {
                     self.diag(self.loc, self.loc, format!("Unexpected char: {}", gc));
@@ -349,5 +399,29 @@ mod tests {
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 7 });
         assert_eq!(lexer.diag.len(), 1);
+    }
+
+    #[test]
+    fn number() {
+        let lexer = Lexer::lex("1234");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].text, "1234");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 3 });
+
+        let lexer = Lexer::lex("1234_5678 ");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].text, "1234_5678");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 8 });
+
+        let lexer = Lexer::lex("  123'sh111bbb ");
+        println!("{:?}", lexer.tokens);
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].text, "123'sh111bbb");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 2 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 13 });
     }
 }
