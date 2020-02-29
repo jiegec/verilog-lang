@@ -491,7 +491,9 @@ impl<'a> Lexer<'a> {
         false
     }
 
+    // 2.7 Identifiers, keywords, and system names
     fn identifier_keyword(&mut self) -> bool {
+        // TODO: Escaped Identifiers
         lazy_static! {
             static ref KEYWORD: HashMap<String, Token> = keyword_map();
         }
@@ -527,6 +529,35 @@ impl<'a> Lexer<'a> {
         true
     }
 
+    fn delimiter(&mut self) -> bool {
+        if let Some((gc, next)) = self.cursor.next() {
+            let token = match gc.base_char() {
+                '#' => Token::Sharp,
+                '(' => Token::LParen,
+                ')' => Token::RParen,
+                '[' => Token::LBracket,
+                ']' => Token::RBracket,
+                ':' => Token::Colon,
+                ',' => Token::Comma,
+                ';' => Token::Semicolon,
+                '.' => Token::Dot,
+                _ => return false,
+            };
+            self.tokens.push(ParsedToken {
+                span: Span {
+                    from: self.loc,
+                    to: self.loc,
+                },
+                token,
+                text: self.cursor.slice_between(next).unwrap(),
+            });
+            self.cursor = next;
+            self.loc.col += 1;
+            return true;
+        }
+        false
+    }
+
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
@@ -553,6 +584,11 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
+                    continue;
+                }
+                '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.'
+                    if self.delimiter() =>
+                {
                     continue;
                 }
                 _ => {
@@ -688,6 +724,5 @@ mod tests {
         assert_eq!(lexer.tokens[3].span.from, Location { row: 0, col: 12 });
         assert_eq!(lexer.tokens[3].span.to, Location { row: 0, col: 17 });
         assert_eq!(lexer.tokens[3].token, Token::Always);
-
     }
 }
