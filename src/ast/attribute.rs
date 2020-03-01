@@ -20,10 +20,9 @@ impl Parse for Attribute {
                         let mut res = Attribute::default();
                         loop {
                             if parser.probe(&[Token::Identifier]) {
-                                if let Some(id) = Identifier::parse(parser) {
-                                    res.attrs.push(id);
-                                    // TODO: handle attr_name = constant_expression
-                                }
+                                let id = Identifier::parse(parser)?;
+                                res.attrs.push(id);
+                                // TODO: handle attr_name = constant_expression
                                 if parser.probe(&[Token::Comma]) {
                                     parser.advance();
                                 }
@@ -54,5 +53,12 @@ mod tests {
         let attr = Attribute::parse(&mut parser);
         assert!(attr.is_some());
         assert_eq!(attr.unwrap().attrs[0].token, 2);
+
+        let mut parser = Parser::from("(* mark_debug, debug_mark *)");
+        let attr = Attribute::parse(&mut parser);
+        assert!(attr.is_some());
+        let attr = attr.unwrap();
+        assert_eq!(attr.attrs[0].token, 2);
+        assert_eq!(attr.attrs[1].token, 4);
     }
 }

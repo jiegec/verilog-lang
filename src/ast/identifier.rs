@@ -35,3 +35,16 @@ impl Parse for Identifier {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        let mut parser = Parser::from("abcdefg");
+        let id = Identifier::parse(&mut parser);
+        assert!(id.is_some());
+        assert_eq!(id.unwrap().token, 0);
+    }
+}

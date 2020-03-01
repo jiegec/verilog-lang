@@ -39,28 +39,26 @@ impl Parse for ModuleDeclaration {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
         let mut res = ModuleDeclaration::default();
         while parser.probe(&[Token::LParen]) {
-            if let Some(attr) = attribute::Attribute::parse(parser) {
-                res.attributes.push(attr);
-            }
+            let attr = attribute::Attribute::parse(parser)?;
+            res.attributes.push(attr);
         }
         if parser.probe(&[Token::Module, Token::MacroModule]) {
             parser.advance();
-            if let Some(identifier) = identifier::Identifier::parse(parser) {
-                res.identifier = identifier;
-                if parser.probe(&[Token::Sharp]) {
-                    // TODO: module_paramter_port_list
-                }
-                if parser.probe(&[Token::LParen]) {
-                    // TODO: list_of_ports
-                }
-                if parser.probe(&[Token::Semicolon]) {
+            let identifier = identifier::Identifier::parse(parser)?;
+            res.identifier = identifier;
+            if parser.probe(&[Token::Sharp]) {
+                // TODO: module_paramter_port_list
+            }
+            if parser.probe(&[Token::LParen]) {
+                // TODO: list_of_ports
+            }
+            if parser.probe(&[Token::Semicolon]) {
+                parser.advance();
+                // TODO: module item
+                if parser.probe(&[Token::EndModule]) {
                     parser.advance();
                     // TODO: module item
-                    if parser.probe(&[Token::EndModule]) {
-                        parser.advance();
-                        // TODO: module item
-                        return Some(res);
-                    }
+                    return Some(res);
                 }
             }
         } else {
