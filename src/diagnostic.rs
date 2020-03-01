@@ -1,3 +1,4 @@
+use crate::lexer::Token;
 use crate::lexer::Span;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -13,6 +14,7 @@ pub enum Message {
     MultilineCommentUnclosed,
     UnrecognizedEscapeCharacter(char),
     UnexpectedChar(char),
+    UnexpectedToken(Token, String),
 }
 
 impl fmt::Display for Message {
@@ -22,6 +24,7 @@ impl fmt::Display for Message {
             MultilineCommentUnclosed => write!(f, "Multiline Comment is not closed"),
             UnrecognizedEscapeCharacter(ch) => write!(f, "Unrecognized escape character: {}", ch),
             UnexpectedChar(ch) => write!(f, "Unexpected character: {}", ch),
+            UnexpectedToken(token, s) => write!(f, "Expected {:?}, but got {}", token, s),
         }
     }
 }

@@ -23,7 +23,6 @@ pub enum Token {
     Number,
     Identifier,
     String,
-    CompilerDirective,
     Directive,
     Comment,
 
@@ -199,8 +198,6 @@ pub enum Token {
     OpRightShift,      // >>
     OpArithLeftShift,  // <<<
     OpArithRightShift, // >>>
-
-    None,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -212,9 +209,9 @@ pub struct ParsedToken<'a> {
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Lexer<'a> {
-    input: &'a str,
     cursor: StrCursor<'a>,
     loc: Location,
+    pub input: &'a str,
     pub tokens: Vec<ParsedToken<'a>>,
     pub diag: Vec<Diagnostic>,
 }
@@ -742,6 +739,8 @@ mod tests {
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 18 });
         assert_eq!(lexer.diag.len(), 1); // \r
+        assert_eq!(lexer.diag[0].msg, Message::UnrecognizedEscapeCharacter('r'));
+        // \r
     }
 
     #[test]
