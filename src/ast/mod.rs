@@ -19,7 +19,7 @@ pub struct ModuleDeclaration {
     pub identifier: identifier::Identifier,
 }
 
-trait Parse: Sized {
+pub trait Parse: Sized {
     fn parse(parser: &mut Parser) -> Option<Self>;
 }
 
