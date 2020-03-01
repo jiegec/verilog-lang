@@ -1,5 +1,5 @@
-use crate::lexer::Token;
 use crate::lexer::Span;
+use crate::lexer::Token;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -15,6 +15,7 @@ pub enum Message {
     UnrecognizedEscapeCharacter(char),
     UnexpectedChar(char),
     UnexpectedToken(Token, String),
+    UnexpectedTokens(Vec<Token>, String),
 }
 
 impl fmt::Display for Message {
@@ -25,6 +26,7 @@ impl fmt::Display for Message {
             UnrecognizedEscapeCharacter(ch) => write!(f, "Unrecognized escape character: {}", ch),
             UnexpectedChar(ch) => write!(f, "Unexpected character: {}", ch),
             UnexpectedToken(token, s) => write!(f, "Expected {:?}, but got {}", token, s),
+            UnexpectedTokens(tokens, s) => write!(f, "Expected {:?}, but got {}", tokens, s),
         }
     }
 }

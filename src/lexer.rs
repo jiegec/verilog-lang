@@ -210,8 +210,8 @@ pub struct ParsedToken<'a> {
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Lexer<'a> {
     cursor: StrCursor<'a>,
-    loc: Location,
-    pub input: &'a str,
+    pub(crate) loc: Location,
+    pub(crate) input: &'a str,
     pub tokens: Vec<ParsedToken<'a>>,
     pub diag: Vec<Diagnostic>,
 }
@@ -219,13 +219,15 @@ pub struct Lexer<'a> {
 fn keyword_map() -> HashMap<String, Token> {
     use Token::*;
     let mut map = HashMap::new();
+    // TODO: all keywords
     map.insert(format!("always"), Always);
     map.insert(format!("always_comb"), AlwaysComb);
     map.insert(format!("always_ff"), AlwaysFf);
     map.insert(format!("and"), And);
     map.insert(format!("assign"), Assign);
     map.insert(format!("automatic"), Automatic);
-    // TODO: all keywords
+    map.insert(format!("endmodule"), EndModule);
+    map.insert(format!("module"), Module);
     map
 }
 

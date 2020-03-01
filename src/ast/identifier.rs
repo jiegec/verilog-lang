@@ -25,6 +25,12 @@ impl Parse for Identifier {
                 );
                 return None;
             }
+        } else {
+            parser.err(
+                parser.location(),
+                parser.location(),
+                Message::UnexpectedToken(Token::Identifier, "end of file".to_owned()),
+            );
         }
         None
     }

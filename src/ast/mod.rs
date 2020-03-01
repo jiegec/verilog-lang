@@ -1,9 +1,9 @@
+use crate::{diagnostic::Message, lexer::Token, parser::Parser};
 use serde::{Deserialize, Serialize};
-use crate::{lexer::Token, parser::Parser};
 
-pub mod module;
-pub mod identifier;
 pub mod attribute;
+pub mod identifier;
+pub mod module;
 
 type TokenIndex = usize;
 
@@ -13,13 +13,13 @@ pub struct SourceText {
     pub modules: Vec<ModuleDeclaration>,
 }
 
-#[derive(PartialEq, Eq,  Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ModuleDeclaration {
     pub attributes: Vec<attribute::Attribute>,
     pub identifier: identifier::Identifier,
 }
 
-trait Parse : Sized {
+trait Parse: Sized {
     fn parse(parser: &mut Parser) -> Option<Self>;
 }
 
@@ -44,10 +44,49 @@ impl Parse for ModuleDeclaration {
             }
         }
         if parser.probe(&[Token::Module, Token::MacroModule]) {
+            parser.advance();
             if let Some(identifier) = identifier::Identifier::parse(parser) {
                 res.identifier = identifier;
+                if parser.probe(&[Token::Sharp]) {
+                    // TODO: module_paramter_port_list
+                }
+                if parser.probe(&[Token::LParen]) {
+                    // TODO: list_of_ports
+                }
+                if parser.probe(&[Token::Semicolon]) {
+                    parser.advance();
+                    // TODO: module item
+                    if parser.probe(&[Token::EndModule]) {
+                        parser.advance();
+                        // TODO: module item
+                        return Some(res);
+                    }
+                }
             }
+        } else {
+            parser.err(
+                parser.location(),
+                parser.location(),
+                Message::UnexpectedTokens(
+                    vec![Token::Module, Token::MacroModule],
+                    "end of file".to_owned(),
+                ),
+            );
         }
-        Some(res)
+        None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn module() {
+        let mut parser = Parser::from("module test; endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        println!("{:?}", parser);
+        assert!(m.is_some());
+        assert_eq!(m.unwrap().identifier.token, 1);
     }
 }

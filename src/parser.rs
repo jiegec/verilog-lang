@@ -1,9 +1,11 @@
 use crate::diagnostic::{Diagnostic, Message, Severity};
 use crate::lexer::{Lexer, Location, ParsedToken, Span, Token};
 
+#[derive(Debug)]
 pub struct Parser<'a> {
     input: &'a str,
     index: usize,
+    end_loc: Location,
     tokens: Vec<ParsedToken<'a>>,
     diag: Vec<Diagnostic>,
 }
@@ -17,6 +19,7 @@ impl<'a> Parser<'a> {
         Parser {
             input: lexer.input,
             index: 0,
+            end_loc: lexer.loc,
             tokens: lexer.tokens,
             diag: lexer.diag,
         }
@@ -48,6 +51,14 @@ impl<'a> Parser<'a> {
 
     pub(crate) fn avail(&self) -> bool {
         self.index < self.tokens.len()
+    }
+
+    pub(crate) fn location(&self) -> Location {
+        if self.index < self.tokens.len() {
+            self.tokens[self.index].span.from
+        } else {
+            self.end_loc
+        }
     }
 
     pub(crate) fn err(&mut self, from: Location, to: Location, msg: Message) {
