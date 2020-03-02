@@ -308,5 +308,23 @@ mod tests {
             m.as_ref().unwrap().header.ports.ports[0].1.port_type,
             Some(NetType::Wire)
         );
+
+        let mut parser = Parser::from("module test(logic sig, input sig2); endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        println!("{:?}", parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
+        assert_eq!(
+            m.as_ref().unwrap().header.ports.ports[0].1.data_type,
+            Some(DataType {
+                integer_type: IntegerVectorType::Logic,
+                sign: None
+            })
+        );
+        assert_eq!(
+            m.as_ref().unwrap().header.ports.ports[1].1.direction,
+            Some(PortDirection::Input)
+        );
     }
 }

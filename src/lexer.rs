@@ -345,6 +345,8 @@ fn keyword_map() -> HashMap<String, Token> {
     map.insert(format!("assign"), Assign);
     map.insert(format!("automatic"), Automatic);
     map.insert(format!("endmodule"), EndModule);
+    map.insert(format!("logic"), Logic);
+    map.insert(format!("input"), Input);
     map.insert(format!("module"), Module);
     map.insert(format!("wire"), Wire);
     map
