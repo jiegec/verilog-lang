@@ -14,6 +14,8 @@ impl Parse for SourceText {
         while parser.avail() {
             if let Some(module) = ModuleDeclaration::parse(parser) {
                 res.modules.push(module);
+            } else {
+                break;
             }
         }
         Some(res)
@@ -111,7 +113,7 @@ mod tests {
             m.as_ref().unwrap().header.ports.ports[0].1.data_type,
             Some(DataType {
                 integer_type: IntegerVectorType::Logic,
-                sign: None
+                ..DataType::default()
             })
         );
         assert_eq!(

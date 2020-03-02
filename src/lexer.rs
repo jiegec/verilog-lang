@@ -348,6 +348,7 @@ fn keyword_map() -> HashMap<String, Token> {
     map.insert(format!("logic"), Logic);
     map.insert(format!("input"), Input);
     map.insert(format!("module"), Module);
+    map.insert(format!("signed"), Signed);
     map.insert(format!("wire"), Wire);
     map
 }
@@ -467,8 +468,8 @@ impl<'a> Lexer<'a> {
                 // hex_number
                 "([1-9][0-9_]*)?'[sS]?[hH][0-9a-fA-FxXzZ][0-9a-fA-FxXzZ_]*", // [ size ] hex_base hex_value
                 // real_number
-                "[0-9][0-9_]*(.[0-9][0-9_]*)?[eE][+-]?[0-9][0-9_]*", // unsigned_number [ . unsigned_number ] exp [ sign ] unsigned_number
-                "[0-9][0-9_]*.[0-9][0-9_]*", // unsigned_number . unsigned_number
+                "[0-9][0-9_]*(\\.[0-9][0-9_]*)?[eE][+-]?[0-9][0-9_]*", // unsigned_number [ . unsigned_number ] exp [ sign ] unsigned_number
+                "[0-9][0-9_]*\\.[0-9][0-9_]*", // unsigned_number . unsigned_number
                 // decimal_number
                 "([1-9][0-9_]*)?'[sS]?[dD][0-9][0-9_]*", // [ size ] decimal_base unsigned_number
                 "([1-9][0-9_]*)?'[sS]?[dD][xX]_*",       // [ size ] decimal_base x_digit { _ }
@@ -489,7 +490,7 @@ impl<'a> Lexer<'a> {
             while let Some((_, next)) = cursor.next() {
                 if next == new_cursor {
                     self.tokens.push(ParsedToken {
-                        token: Token::Comment,
+                        token: Token::Number,
                         span: Span { from, to: self.loc },
                         text: orig_cursor.slice_between(next).unwrap(),
                     });

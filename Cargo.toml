@@ -19,3 +19,7 @@ structopt = { version = "0.3", features = ["paw"] }
 [[example]]
 name = "lex"
 path = "src/examples/lex.rs"
+
+[[example]]
+name = "parse"
+path = "src/examples/parse.rs"

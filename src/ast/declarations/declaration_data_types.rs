@@ -8,6 +8,7 @@ use crate::ast::*;
 pub struct DataType {
     pub integer_type: IntegerVectorType,
     pub sign: Option<Signing>,
+    pub dimensions: Vec<PackedDimension>,
 }
 
 impl Parse for DataType {
@@ -17,6 +18,13 @@ impl Parse for DataType {
             res.integer_type = integer_type;
             if parser.probe(&[Token::Signed, Token::Unsigned]) {
                 res.sign = Signing::parse(parser);
+            }
+            while parser.probe(&[Token::LBracket]) {
+                if let Some(dimension) = PackedDimension::parse(parser) {
+                    res.dimensions.push(dimension);
+                } else {
+                    break;
+                }
             }
             Some(res)
         } else {
@@ -82,5 +90,27 @@ impl Parse for Signing {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn data_type() {
+        let mut parser = Parser::from("logic signed [1:2][][]");
+        let m = DataType::parse(&mut parser);
+        println!("{:?}", parser);
+        assert_eq!(m.as_ref().unwrap().integer_type, IntegerVectorType::Logic);
+        assert_eq!(m.as_ref().unwrap().sign, Some(Signing::Signed));
+        assert_eq!(
+            m.as_ref().unwrap().dimensions[0]
+                .from
+                .as_ref()
+                .unwrap()
+                .token,
+            3
+        );
     }
 }
