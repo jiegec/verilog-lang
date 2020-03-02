@@ -38,13 +38,10 @@ impl Parse for Ports {
 
 /// ansi_port_declaration ::= [ net_port_header ] port_identifier { unpacked_dimension }
 /// net_port_header ::= [ port_direction ] net_port_type
-/// net_port_type ::= [ net_type ] data_type_or_implicit
-/// data_type_or_implicit ::= data_type | implicit_data_type
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Port {
     pub direction: Option<PortDirection>,
-    pub port_type: Option<NetType>,
-    pub data_type: Option<DataTypeOrImplicit>,
+    pub net_port_type: Option<NetPortType>,
     pub identifier: Identifier,
     pub dimensions: Vec<UnpackedDimension>,
 }
@@ -68,10 +65,7 @@ impl Parse for Port {
             Token::Wire,
             Token::Wand,
             Token::Wor,
-        ]) {
-            res.port_type = NetType::parse(parser);
-        }
-        if parser.probe(&[
+            // data_type_or_implicit
             Token::Bit,
             Token::Logic,
             Token::Reg,
@@ -79,7 +73,7 @@ impl Parse for Port {
             Token::Unsigned,
             Token::LBracket,
         ]) {
-            res.data_type = DataTypeOrImplicit::parse(parser);
+            res.net_port_type = NetPortType::parse(parser);
         }
 
         if parser.probe_err(&[Token::Identifier]) {

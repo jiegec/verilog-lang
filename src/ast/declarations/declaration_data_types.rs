@@ -137,7 +137,13 @@ impl Parse for DataTypeOrImplicit {
                 return Some(DataTypeOrImplicit::Data(data));
             }
         }
-        if parser.probe(&[Token::Signed, Token::Unsigned, Token::LBracket]) {
+        if parser.probe(&[
+            Token::Signed,
+            Token::Unsigned,
+            Token::LBracket,
+            // FOLLOW
+            Token::Identifier,
+        ]) {
             if let Some(data) = ImplicitDataType::parse(parser) {
                 return Some(DataTypeOrImplicit::ImplicitData(data));
             }
@@ -150,8 +156,8 @@ impl Parse for DataTypeOrImplicit {
 /// net_port_type ::= [ net_type ] data_type_or_implicit
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct NetPortType {
-    net_type: Option<NetType>,
-    data_type_or_implicit: DataTypeOrImplicit,
+    pub net_type: Option<NetType>,
+    pub data_type_or_implicit: DataTypeOrImplicit,
 }
 
 impl Parse for NetPortType {
@@ -180,6 +186,8 @@ impl Parse for NetPortType {
             Token::Signed,
             Token::Unsigned,
             Token::LBracket,
+            // FOLLOW
+            Token::Identifier,
         ]) {
             if let Some(data) = DataTypeOrImplicit::parse(parser) {
                 res.data_type_or_implicit = data;
@@ -209,5 +217,25 @@ mod tests {
                 .token,
             3
         );
+    }
+
+    #[test]
+    fn net_port_type() {
+        let mut parser = Parser::from("logic");
+        let m = NetPortType::parse(&mut parser);
+        println!("{:?}", parser);
+        assert_eq!(m.as_ref().unwrap().net_type, None);
+        assert_eq!(
+            m.as_ref().unwrap().data_type_or_implicit,
+            DataTypeOrImplicit::Data(DataType {
+                integer_type: IntegerVectorType::Logic,
+                ..DataType::default()
+            })
+        );
+
+        let mut parser = Parser::from("wire abc");
+        let m = NetPortType::parse(&mut parser);
+        println!("{:?}", parser);
+        assert_eq!(m.as_ref().unwrap().net_type, Some(NetType::Wire));
     }
 }

@@ -99,7 +99,12 @@ mod tests {
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
         assert_eq!(
-            m.as_ref().unwrap().header.ports.ports[0].1.port_type,
+            m.as_ref().unwrap().header.ports.ports[0]
+                .1
+                .net_port_type
+                .as_ref()
+                .unwrap()
+                .net_type,
             Some(NetType::Wire)
         );
 
@@ -109,11 +114,16 @@ mod tests {
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
         assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
         assert_eq!(
-            m.as_ref().unwrap().header.ports.ports[0].1.data_type,
-            Some(DataTypeOrImplicit::Data(DataType {
+            m.as_ref().unwrap().header.ports.ports[0]
+                .1
+                .net_port_type
+                .as_ref()
+                .unwrap()
+                .data_type_or_implicit,
+            DataTypeOrImplicit::Data(DataType {
                 integer_type: IntegerVectorType::Logic,
                 ..DataType::default()
-            }))
+            })
         );
         assert_eq!(
             m.as_ref().unwrap().header.ports.ports[1].1.direction,
