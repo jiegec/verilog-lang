@@ -3,7 +3,7 @@
 use crate::ast::*;
 
 /// packed_dimension ::= [ constant_range ] | unsized_dimension
-/// unsigned_dimension ::= [ ]
+/// unsized_dimension ::= [ ]
 /// constant_range ::= constant_expression : constant_expression
 /// constant_expression ::= constant_primary
 /// constant_primary ::= primary_literal

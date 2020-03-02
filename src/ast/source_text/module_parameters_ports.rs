@@ -121,7 +121,7 @@ impl Parse for PortDirection {
     }
 }
 
-/// net_type ::= supply0 | supply1 | tri | triand | trior | trireg | tri0 | tri1 | uwire| wire | wand | wor
+/// net_type ::= supply0 | supply1 | tri | triand | trior | trireg | tri0 | tri1 | uwire | wire | wand | wor
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub enum NetType {
     Wire,
