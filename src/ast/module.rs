@@ -291,8 +291,22 @@ mod tests {
     fn module() {
         let mut parser = Parser::from("module test; endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+
+        let mut parser = Parser::from("module test(); endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 0);
+
+        let mut parser = Parser::from("module test(wire sig); endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
         println!("{:?}", parser);
-        println!("{:?}", m);
-        assert_eq!(m.unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
+        assert_eq!(
+            m.as_ref().unwrap().header.ports.ports[0].1.port_type,
+            Some(NetType::Wire)
+        );
     }
 }
