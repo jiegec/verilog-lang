@@ -36,16 +36,17 @@ impl Parse for Ports {
     }
 }
 
-/// ansi_port_declaration ::= [ net_port_header ] port_identifier
+/// ansi_port_declaration ::= [ net_port_header ] port_identifier { unpacked_dimension }
 /// net_port_header ::= [ port_direction ] net_port_type
 /// net_port_type ::= [ net_type ] data_type_or_implicit
-/// data_type_or_implicit ::= data_type
+/// data_type_or_implicit ::= data_type | implicit_data_type
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Port {
     pub direction: Option<PortDirection>,
     pub port_type: Option<NetType>,
-    pub data_type: Option<DataType>,
+    pub data_type: Option<DataTypeOrImplicit>,
     pub identifier: Identifier,
+    pub dimensions: Vec<UnpackedDimension>,
 }
 
 impl Parse for Port {
@@ -70,13 +71,25 @@ impl Parse for Port {
         ]) {
             res.port_type = NetType::parse(parser);
         }
-        if parser.probe(&[Token::Bit, Token::Logic, Token::Reg]) {
-            res.data_type = DataType::parse(parser);
+        if parser.probe(&[
+            Token::Bit,
+            Token::Logic,
+            Token::Reg,
+            Token::Signed,
+            Token::Unsigned,
+            Token::LBracket,
+        ]) {
+            res.data_type = DataTypeOrImplicit::parse(parser);
         }
 
         if parser.probe_err(&[Token::Identifier]) {
             if let Some(identifier) = Identifier::parse(parser) {
                 res.identifier = identifier;
+                while parser.probe(&[Token::LBracket]) {
+                    if let Some(dimension) = UnpackedDimension::parse(parser) {
+                        res.dimensions.push(dimension);
+                    }
+                }
                 return Some(res);
             }
         }
@@ -134,5 +147,20 @@ impl Parse for NetType {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ports() {
+        let mut parser = Parser::from("(logic [1:2] sig, input wire [3:4] sig2)");
+        let m = Ports::parse(&mut parser);
+        println!("{:?}", parser);
+        println!("{:?}", m);
+        assert_eq!(m.as_ref().unwrap().ports.len(), 2);
+        assert_eq!(m.as_ref().unwrap().ports[0].1.direction, None);
     }
 }

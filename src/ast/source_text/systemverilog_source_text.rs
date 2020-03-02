@@ -105,16 +105,15 @@ mod tests {
 
         let mut parser = Parser::from("module test(logic sig, input sig2); endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
-        println!("{:?}", parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
         assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
         assert_eq!(
             m.as_ref().unwrap().header.ports.ports[0].1.data_type,
-            Some(DataType {
+            Some(DataTypeOrImplicit::Data(DataType {
                 integer_type: IntegerVectorType::Logic,
                 ..DataType::default()
-            })
+            }))
         );
         assert_eq!(
             m.as_ref().unwrap().header.ports.ports[1].1.direction,

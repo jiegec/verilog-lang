@@ -93,6 +93,53 @@ impl Parse for Signing {
     }
 }
 
+/// A.2.2.1 Net and variable types
+/// implicit_data_type ::= [ signing ] { packed_dimension }
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
+pub struct ImplicitDataType {
+    pub sign: Option<Signing>,
+    pub dimensions: Vec<PackedDimension>,
+}
+
+impl Parse for ImplicitDataType {
+    fn parse(parser: &mut Parser<'_>) -> Option<Self> {
+        let mut res = Self::default();
+        if parser.probe(&[Token::Signed, Token::Unsigned]) {
+            res.sign = Signing::parse(parser);
+        }
+        while parser.probe(&[Token::LBracket]) {
+            if let Some(dimension) = PackedDimension::parse(parser) {
+                res.dimensions.push(dimension);
+            }
+        }
+        Some(res)
+    }
+}
+
+/// A.2.2.1 Net and variable types
+/// data_type_or_implicit ::= data_type | implicit_data_type
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+pub enum DataTypeOrImplicit {
+    Data(DataType),
+    ImplicitData(ImplicitDataType),
+}
+
+impl Parse for DataTypeOrImplicit {
+    fn parse(parser: &mut Parser<'_>) -> Option<Self> {
+        if parser.probe(&[Token::Bit, Token::Logic, Token::Reg]) {
+            if let Some(data) = DataType::parse(parser) {
+                return Some(DataTypeOrImplicit::Data(data));
+            }
+        }
+        if parser.probe(&[Token::Signed, Token::Unsigned, Token::LBracket]) {
+            if let Some(data) = ImplicitDataType::parse(parser) {
+                return Some(DataTypeOrImplicit::ImplicitData(data));
+            }
+        }
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
