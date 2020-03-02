@@ -1,12 +1,34 @@
 use super::identifier::Identifier;
-use crate::ast::{Parse, TokenIndex};
+use crate::ast::Parse;
 use crate::{lexer::Token, parser::Parser};
 use serde::{Deserialize, Serialize};
 
-// A.1.3 Module and primitive source text
+/// A.9.1 Attributes
+/// { attribute_instance }
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
+pub struct Attributes {
+    pub attrs: Vec<Attribute>,
+}
+
+/// A.9.1 Attributes
+/// attribute_instance ::= (* attr_spec { , attr_spec } *)
+/// attr_spec ::= attr_name
+/// attr_name ::= identifier
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Attribute {
     pub attrs: Vec<Identifier>,
+}
+
+impl Parse for Attributes {
+    fn parse(parser: &mut Parser<'_>) -> Option<Self> {
+        let mut res = Self::default();
+        while parser.probe(&[Token::LParen]) {
+            if let Some(attr) = Attribute::parse(parser) {
+                res.attrs.push(attr);
+            }
+        }
+        Some(res)
+    }
 }
 
 impl Parse for Attribute {

@@ -41,6 +41,22 @@ impl<'a> Parser<'a> {
         }
     }
 
+    pub(crate) fn probe_err(&mut self, arr: &[Token]) -> bool {
+        let res = if self.index < self.tokens.len() {
+            arr.contains(&self.tokens[self.index].token)
+        } else {
+            false
+        };
+        if !res {
+            self.err(
+                self.location(),
+                self.location(),
+                Message::UnexpectedTokens(arr.to_owned(), self.current_text()),
+            );
+        }
+        res
+    }
+
     pub(crate) fn advance(&mut self) {
         self.index += 1;
     }
@@ -58,6 +74,14 @@ impl<'a> Parser<'a> {
             self.tokens[self.index].span.from
         } else {
             self.end_loc
+        }
+    }
+
+    pub(crate) fn current_text(&self) -> String {
+        if self.index < self.tokens.len() {
+            self.tokens[self.index].text.to_owned()
+        } else {
+            "end of file".to_owned()
         }
     }
 
