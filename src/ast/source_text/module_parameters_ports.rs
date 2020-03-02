@@ -150,6 +150,22 @@ impl Parse for NetType {
     }
 }
 
+/// port_declaration ::= { attribute_instance } inout_declaration | { attribute_instance } input_declaration | { attribute_instance } output_declaration | { attribute_instance } ref_declaration | { attribute_instance } interface_port_declaration
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+pub enum PortDeclaration {
+    InOut(Attributes),
+    Input(Attributes),
+    Output(Attributes),
+    Ref(Attributes),
+    InterfacePort,
+}
+
+impl Parse for PortDeclaration {
+    fn parse(parser: &mut Parser<'_>) -> Option<Self> {
+        unimplemented!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -124,6 +124,12 @@ pub enum DataTypeOrImplicit {
     ImplicitData(ImplicitDataType),
 }
 
+impl Default for DataTypeOrImplicit {
+    fn default() -> Self {
+        Self::Data(DataType::default())
+    }
+}
+
 impl Parse for DataTypeOrImplicit {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
         if parser.probe(&[Token::Bit, Token::Logic, Token::Reg]) {
@@ -134,6 +140,50 @@ impl Parse for DataTypeOrImplicit {
         if parser.probe(&[Token::Signed, Token::Unsigned, Token::LBracket]) {
             if let Some(data) = ImplicitDataType::parse(parser) {
                 return Some(DataTypeOrImplicit::ImplicitData(data));
+            }
+        }
+        None
+    }
+}
+
+/// A.2.2.1 Net and variable types
+/// net_port_type ::= [ net_type ] data_type_or_implicit
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
+pub struct NetPortType {
+    net_type: Option<NetType>,
+    data_type_or_implicit: DataTypeOrImplicit,
+}
+
+impl Parse for NetPortType {
+    fn parse(parser: &mut Parser<'_>) -> Option<Self> {
+        let mut res = NetPortType::default();
+        if parser.probe(&[
+            Token::Supply0,
+            Token::Supply1,
+            Token::Tri,
+            Token::TriAnd,
+            Token::TriOr,
+            Token::TriReg,
+            Token::Tri0,
+            Token::Tri1,
+            Token::Uwire,
+            Token::Wire,
+            Token::Wand,
+            Token::Wor,
+        ]) {
+            res.net_type = NetType::parse(parser);
+        }
+        if parser.probe(&[
+            Token::Bit,
+            Token::Logic,
+            Token::Reg,
+            Token::Signed,
+            Token::Unsigned,
+            Token::LBracket,
+        ]) {
+            if let Some(data) = DataTypeOrImplicit::parse(parser) {
+                res.data_type_or_implicit = data;
+                return Some(res);
             }
         }
         None
