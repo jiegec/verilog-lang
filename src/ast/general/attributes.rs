@@ -1,22 +1,13 @@
-use super::identifier::Identifier;
-use crate::ast::Parse;
+//! A.9.1 Attributes
+
+use crate::ast::*;
 use crate::{lexer::Token, parser::Parser};
 use serde::{Deserialize, Serialize};
 
-/// A.9.1 Attributes
 /// { attribute_instance }
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Attributes {
     pub attrs: Vec<Attribute>,
-}
-
-/// A.9.1 Attributes
-/// attribute_instance ::= (* attr_spec { , attr_spec } *)
-/// attr_spec ::= attr_name
-/// attr_name ::= identifier
-#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
-pub struct Attribute {
-    pub attrs: Vec<Identifier>,
 }
 
 impl Parse for Attributes {
@@ -29,6 +20,14 @@ impl Parse for Attributes {
         }
         Some(res)
     }
+}
+
+/// attribute_instance ::= (* attr_spec { , attr_spec } *)
+/// attr_spec ::= attr_name
+/// attr_name ::= identifier
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
+pub struct Attribute {
+    pub attrs: Vec<Identifier>,
 }
 
 impl Parse for Attribute {

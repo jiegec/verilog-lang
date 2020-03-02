@@ -1,8 +1,5 @@
-use super::TokenIndex;
-use crate::{ast::Parse, diagnostic::Message, lexer::Token, parser::Parser};
-use serde::{Deserialize, Serialize};
-
-// A.9.3 Identifiers
+//! A.9.3 Identifiers
+use crate::ast::*;
 
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Identifier {
