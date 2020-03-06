@@ -16,6 +16,7 @@ net_port_type ::= net_type? data_type_or_implicit;
 net_type ::= 'supply0' | 'supply1' | 'tri' | 'triand' | 'trior' | 'trireg' | 'tri0' | 'tri1' | 'uwire' | 'wire' | 'wand' | 'wor';
 data_type_or_implicit ::= data_type | implicit_data_type;
 data_type ::= integer_vector_type signing? packed_dimension*;
+implicit_data_type ::= signing? packed_dimension*;
 signing ::= 'signed' | 'unsigned';
 integer_vector_type ::= 'bit' | 'logic' | 'reg';
 
@@ -33,7 +34,7 @@ attribute_instance ::= '(' '*' attr_spec (',' attr_spec)* '*' ')';
 attr_spec ::= attr_name;
 attr_name ::= identifier;
 
-//! A.9.3 Identifiers
+// A.9.3 Identifiers
 identifier ::= 'identifier';
 module_identifier ::= identifier;
 port_identifier ::= identifier;
