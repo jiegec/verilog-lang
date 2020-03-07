@@ -34,6 +34,9 @@ impl Parse for ModuleDeclaration {
         if let Some(header) = ModuleHeader::parse(parser) {
             res.header = header;
             // TODO: module_item
+            while !parser.probe(&[Token::EndModule]) && parser.avail() {
+                parser.advance();
+            }
             if parser.probe_err(&[Token::EndModule]) {
                 parser.advance();
                 return Some(res);
@@ -129,5 +132,11 @@ mod tests {
             m.as_ref().unwrap().header.ports.ports[1].1.direction,
             Some(PortDirection::Input)
         );
+
+        let mut parser =
+            Parser::from("module test(logic sig, input sig2); output wire [1:0] test; endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
     }
 }
