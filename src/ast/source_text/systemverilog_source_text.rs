@@ -12,6 +12,10 @@ impl Parse for SourceText {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
         let mut res = SourceText::default();
         while parser.avail() {
+            if parser.probe(&[Token::Comment]) {
+                parser.advance();
+                continue;
+            }
             if let Some(module) = ModuleDeclaration::parse(parser) {
                 res.modules.push(module);
             } else {
@@ -90,7 +94,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn module() {
+    fn simple_module() {
         let mut parser = Parser::from("module test; endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
@@ -99,7 +103,10 @@ mod tests {
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 0);
+    }
 
+    #[test]
+    fn module_signals() {
         let mut parser = Parser::from("module test(wire sig); endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
@@ -142,7 +149,10 @@ mod tests {
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
         assert_eq!(m.as_ref().unwrap().items.len(), 0);
+    }
 
+    #[test]
+    fn module() {
         let mut parser =
             Parser::from("module test(logic sig, input sig2); output wire [1:0] test; endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
@@ -159,5 +169,19 @@ mod tests {
         let mut parser = Parser::from("module test; output wire [1:0] test; begin end endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().items.len(), 1);
+    }
+
+    #[test]
+    fn source_text_comments() {
+        let mut parser = Parser::from("// some comment");
+        let m = SourceText::parse(&mut parser);
+        assert_eq!(parser.get_diag().len(), 0);
+    }
+
+    #[test]
+    fn source_text_multiple_modules() {
+        let mut parser = Parser::from("module a;endmodule module b;endmodule");
+        let m = SourceText::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().modules.len(), 2);
     }
 }
