@@ -137,6 +137,12 @@ mod tests {
             Some(PortDirection::Input)
         );
 
+        let mut parser = Parser::from("module test(output reg[6:0] sig2); endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
+        assert_eq!(m.as_ref().unwrap().items.len(), 0);
+
         let mut parser =
             Parser::from("module test(logic sig, input sig2); output wire [1:0] test; endmodule");
         let m = ModuleDeclaration::parse(&mut parser);

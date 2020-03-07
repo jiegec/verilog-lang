@@ -352,6 +352,7 @@ fn keyword_map() -> HashMap<String, Token> {
     map.insert(format!("input"), Input);
     map.insert(format!("output"), Output);
     map.insert(format!("module"), Module);
+    map.insert(format!("reg"), Reg);
     map.insert(format!("signed"), Signed);
     map.insert(format!("wire"), Wire);
     map
