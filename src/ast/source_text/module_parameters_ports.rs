@@ -144,19 +144,37 @@ impl Parse for NetType {
     }
 }
 
-/// port_declaration ::= { attribute_instance } inout_declaration | { attribute_instance } input_declaration | { attribute_instance } output_declaration | { attribute_instance } ref_declaration | { attribute_instance } interface_port_declaration
+/// port_declaration ::= { attribute_instance } inout_declaration | { attribute_instance } input_declaration | { attribute_instance } output_declaration
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub enum PortDeclaration {
-    InOut(Attributes),
-    Input(Attributes),
-    Output(Attributes),
-    Ref(Attributes),
-    InterfacePort,
+    InOut(Attributes, InOutDeclaration),
+    Input(Attributes, InputDeclaration),
+    Output(Attributes, OutputDeclaration),
 }
 
 impl Parse for PortDeclaration {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
-        unimplemented!()
+        let attributes = if parser.probe(&[Token::LParen]) {
+            Attributes::parse(parser).unwrap_or(Attributes::default())
+        } else {
+            Attributes::default()
+        };
+        if parser.probe(&[Token::InOut]) {
+            if let Some(decl) = InOutDeclaration::parse(parser) {
+                return Some(PortDeclaration::InOut(attributes, decl));
+            }
+        }
+        if parser.probe(&[Token::Input]) {
+            if let Some(decl) = InputDeclaration::parse(parser) {
+                return Some(PortDeclaration::Input(attributes, decl));
+            }
+        }
+        if parser.probe(&[Token::Output]) {
+            if let Some(decl) = OutputDeclaration::parse(parser) {
+                return Some(PortDeclaration::Output(attributes, decl));
+            }
+        }
+        None
     }
 }
 

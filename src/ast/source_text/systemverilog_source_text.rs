@@ -26,6 +26,7 @@ impl Parse for SourceText {
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ModuleDeclaration {
     pub header: ModuleHeader,
+    pub items: Vec<ModuleItem>,
 }
 
 impl Parse for ModuleDeclaration {
@@ -35,7 +36,11 @@ impl Parse for ModuleDeclaration {
             res.header = header;
             // TODO: module_item
             while !parser.probe(&[Token::EndModule]) && parser.avail() {
-                parser.advance();
+                if let Some(item) = ModuleItem::parse(parser) {
+                    res.items.push(item);
+                } else {
+                    parser.advance();
+                }
             }
             if parser.probe_err(&[Token::EndModule]) {
                 parser.advance();
