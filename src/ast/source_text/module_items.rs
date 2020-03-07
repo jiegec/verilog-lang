@@ -17,10 +17,10 @@ impl Parse for ModuleItem {
             Token::Input,
             Token::Output,
             Token::Ref,
-            Token::Comma,
+            Token::Semicolon,
         ]) {
             if let Some(port) = PortDeclaration::parse(parser) {
-                if parser.probe_err(&[Token::Comma]) {
+                if parser.probe_err(&[Token::Semicolon]) {
                     parser.advance();
                     return Some(ModuleItem::Port(port));
                 }

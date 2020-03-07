@@ -148,5 +148,10 @@ mod tests {
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
+        assert_eq!(m.as_ref().unwrap().items.len(), 1);
+
+        let mut parser = Parser::from("module test; output wire [1:0] test; begin end endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().items.len(), 1);
     }
 }
