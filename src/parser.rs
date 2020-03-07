@@ -17,6 +17,7 @@ impl<'a> Parser<'a> {
         let lexer = Lexer::lex(input);
         Self::from_lexer(lexer)
     }
+
     pub fn from_lexer(lexer: Lexer<'a>) -> Parser<'a> {
         Parser {
             input: lexer.input,
@@ -101,5 +102,9 @@ impl<'a> Parser<'a> {
             msg,
             severity: Severity::Warning,
         });
+    }
+
+    pub fn get_diag(&self) -> &Vec<Diagnostic> {
+        &self.diag
     }
 }
