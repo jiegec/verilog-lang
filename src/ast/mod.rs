@@ -1,3 +1,5 @@
+//! Verilog AST
+
 use crate::{diagnostic::Message, lexer::Token, parser::Parser};
 use serde::{Deserialize, Serialize};
 

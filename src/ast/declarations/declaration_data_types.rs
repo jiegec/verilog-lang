@@ -206,7 +206,6 @@ mod tests {
     fn data_type() {
         let mut parser = Parser::from("logic signed [1:2][][]");
         let m = DataType::parse(&mut parser);
-        println!("{:?}", parser);
         assert_eq!(m.as_ref().unwrap().integer_type, IntegerVectorType::Logic);
         assert_eq!(m.as_ref().unwrap().sign, Some(Signing::Signed));
         assert_eq!(
@@ -223,7 +222,6 @@ mod tests {
     fn net_port_type() {
         let mut parser = Parser::from("logic");
         let m = NetPortType::parse(&mut parser);
-        println!("{:?}", parser);
         assert_eq!(m.as_ref().unwrap().net_type, None);
         assert_eq!(
             m.as_ref().unwrap().data_type_or_implicit,
@@ -235,7 +233,6 @@ mod tests {
 
         let mut parser = Parser::from("wire abc");
         let m = NetPortType::parse(&mut parser);
-        println!("{:?}", parser);
         assert_eq!(m.as_ref().unwrap().net_type, Some(NetType::Wire));
     }
 }

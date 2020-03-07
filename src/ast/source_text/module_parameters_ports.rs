@@ -186,8 +186,6 @@ mod tests {
     fn ports() {
         let mut parser = Parser::from("(logic [1:2] sig, input wire [3:4] sig2)");
         let m = Ports::parse(&mut parser);
-        println!("{:?}", parser);
-        println!("{:?}", m);
         assert_eq!(m.as_ref().unwrap().ports.len(), 2);
         assert_eq!(m.as_ref().unwrap().ports[0].1.direction, None);
     }

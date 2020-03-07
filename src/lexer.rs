@@ -1,3 +1,5 @@
+//! Lexer
+
 use crate::diagnostic::{Diagnostic, Message, Severity};
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -787,26 +789,22 @@ mod tests {
     #[test]
     fn unexpected_char() {
         let lexer = Lexer::lex("é和é是不一样的");
-        println!("{:?}", lexer);
         assert!(lexer.diag.len() > 0);
     }
 
     #[test]
     fn comment() {
         let lexer = Lexer::lex("// woc woc\nsomething // abcde");
-        println!("{:?}", lexer.tokens);
         assert!(lexer.tokens.len() > 0);
         assert_eq!(lexer.tokens[0].text, "// woc woc");
 
         let lexer = Lexer::lex("/* woc woc\nsomething */");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 1);
         assert_eq!(lexer.tokens[0].text, "/* woc woc\nsomething */");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 11 });
 
         let lexer = Lexer::lex("/* not closed\ncomment ");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens[0].text, "/* not closed\ncomment ");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 7 });
@@ -816,28 +814,24 @@ mod tests {
     #[test]
     fn number() {
         let lexer = Lexer::lex("1234");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 1);
         assert_eq!(lexer.tokens[0].text, "1234");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 3 });
 
         let lexer = Lexer::lex("1234_5678 ");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 1);
         assert_eq!(lexer.tokens[0].text, "1234_5678");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 8 });
 
         let lexer = Lexer::lex("  123'sh111bbb ");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 1);
         assert_eq!(lexer.tokens[0].text, "123'sh111bbb");
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 2 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 13 });
 
         let lexer = Lexer::lex("1.0 1.0e+30");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 2);
         assert_eq!(lexer.tokens[0].text, "1.0");
         assert_eq!(lexer.tokens[1].text, "1.0e+30");
@@ -846,7 +840,6 @@ mod tests {
     #[test]
     fn operator() {
         let lexer = Lexer::lex("+~|<<<^~-");
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 5);
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 0 });
@@ -859,8 +852,6 @@ mod tests {
     #[test]
     fn string() {
         let lexer = Lexer::lex(r#""abcde\t\n\r\\\"\"""#);
-        println!("{:?}", lexer.tokens);
-        println!("{:?}", lexer.diag);
         assert_eq!(lexer.tokens.len(), 1);
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 18 });
@@ -872,7 +863,6 @@ mod tests {
     #[test]
     fn identifier() {
         let lexer = Lexer::lex(r#""abc"abc"#);
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 2);
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 4 });
@@ -880,7 +870,6 @@ mod tests {
         assert_eq!(lexer.tokens[1].span.to, Location { row: 0, col: 7 });
 
         let lexer = Lexer::lex(r#"abc "abc""#);
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 2);
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 2 });
@@ -891,7 +880,6 @@ mod tests {
     #[test]
     fn keyword() {
         let lexer = Lexer::lex(r#"and andd an always"#);
-        println!("{:?}", lexer.tokens);
         assert_eq!(lexer.tokens.len(), 4);
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 0, col: 2 });

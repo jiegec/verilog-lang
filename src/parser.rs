@@ -1,3 +1,5 @@
+//! Parser
+
 use crate::diagnostic::{Diagnostic, Message, Severity};
 use crate::lexer::{Lexer, Location, ParsedToken, Span, Token};
 

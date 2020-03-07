@@ -102,7 +102,6 @@ mod tests {
 
         let mut parser = Parser::from("module test(wire sig); endmodule");
         let m = ModuleDeclaration::parse(&mut parser);
-        println!("{:?}", parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports[0].1.direction, None);
@@ -137,6 +136,12 @@ mod tests {
             m.as_ref().unwrap().header.ports.ports[1].1.direction,
             Some(PortDirection::Input)
         );
+
+        let mut parser =
+            Parser::from("module test(logic sig, input sig2); output wire [1:0] test; endmodule");
+        let m = ModuleDeclaration::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
+        assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 2);
 
         let mut parser =
             Parser::from("module test(logic sig, input sig2); output wire [1:0] test; endmodule");

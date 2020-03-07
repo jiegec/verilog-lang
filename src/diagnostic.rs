@@ -1,3 +1,5 @@
+//! Diagnostics
+
 use crate::lexer::Span;
 use crate::lexer::Token;
 use serde::{Deserialize, Serialize};
