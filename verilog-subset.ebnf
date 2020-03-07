@@ -52,6 +52,5 @@ identifier ::= 'identifier';
 module_identifier ::= identifier;
 port_identifier ::= identifier;
 
+// A.8.7 Numbers
 number ::= 'number';
-module_item ::= 'unimplemented';
-list_of_port_declarations ::= 'unimplemented';
