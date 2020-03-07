@@ -107,4 +107,8 @@ impl<'a> Parser<'a> {
     pub fn get_diag(&self) -> &Vec<Diagnostic> {
         &self.diag
     }
+
+    pub fn get_token(&self, index: usize) -> &ParsedToken {
+        &self.tokens[index]
+    }
 }
