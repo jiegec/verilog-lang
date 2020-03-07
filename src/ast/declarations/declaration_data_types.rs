@@ -1,9 +1,9 @@
 //! A.2.2 Declaration data types
 use crate::ast::*;
 
-/// A.2.2.1 Net and variable types
-/// data_type ::= integer_vector_type [ signing ] { packed_dimension }
-/// signing ::= signed | unsigned
+/// # A.2.2.1 Net and variable types
+/// ## data_type ::= integer_vector_type [ signing ] { packed_dimension }
+/// ## signing ::= signed | unsigned
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct DataType {
     pub integer_type: IntegerVectorType,
@@ -33,8 +33,8 @@ impl Parse for DataType {
     }
 }
 
-/// A.2.2.1 Net and variable types
-/// integer_vector_type ::= bit | logic | reg
+/// # A.2.2.1 Net and variable types
+/// ## integer_vector_type ::= bit | logic | reg
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub enum IntegerVectorType {
     Bit,
@@ -46,14 +46,6 @@ impl Default for IntegerVectorType {
     fn default() -> Self {
         Self::Bit
     }
-}
-
-/// A.2.2.1 Net and variable types
-/// signing ::= signed | unsigned
-#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
-pub enum Signing {
-    Signed,
-    Unsigned,
 }
 
 impl Parse for IntegerVectorType {
@@ -75,6 +67,14 @@ impl Parse for IntegerVectorType {
     }
 }
 
+/// # A.2.2.1 Net and variable types
+/// ## signing ::= signed | unsigned
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+pub enum Signing {
+    Signed,
+    Unsigned,
+}
+
 impl Parse for Signing {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
         if let Some(token) = parser.peek() {
@@ -93,8 +93,8 @@ impl Parse for Signing {
     }
 }
 
-/// A.2.2.1 Net and variable types
-/// implicit_data_type ::= [ signing ] { packed_dimension }
+/// # A.2.2.1 Net and variable types
+/// ## implicit_data_type ::= [ signing ] { packed_dimension }
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ImplicitDataType {
     pub sign: Option<Signing>,
@@ -116,8 +116,8 @@ impl Parse for ImplicitDataType {
     }
 }
 
-/// A.2.2.1 Net and variable types
-/// data_type_or_implicit ::= data_type | implicit_data_type
+/// # A.2.2.1 Net and variable types
+/// ## data_type_or_implicit ::= data_type | implicit_data_type
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub enum DataTypeOrImplicit {
     Data(DataType),
@@ -152,8 +152,8 @@ impl Parse for DataTypeOrImplicit {
     }
 }
 
-/// A.2.2.1 Net and variable types
-/// net_port_type ::= [ net_type ] data_type_or_implicit
+/// # A.2.2.1 Net and variable types
+/// ## net_port_type ::= [ net_type ] data_type_or_implicit
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct NetPortType {
     pub net_type: Option<NetType>,

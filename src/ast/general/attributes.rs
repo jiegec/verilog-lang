@@ -4,7 +4,7 @@ use crate::ast::*;
 use crate::{lexer::Token, parser::Parser};
 use serde::{Deserialize, Serialize};
 
-/// { attribute_instance }
+/// ## { attribute_instance }
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Attributes {
     pub attrs: Vec<Attribute>,
@@ -22,9 +22,9 @@ impl Parse for Attributes {
     }
 }
 
-/// attribute_instance ::= (* attr_spec { , attr_spec } *)
-/// attr_spec ::= attr_name
-/// attr_name ::= identifier
+/// ## attribute_instance ::= (* attr_spec { , attr_spec } *)
+/// ## attr_spec ::= attr_name
+/// ## attr_name ::= identifier
 #[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Attribute {
     pub attrs: Vec<Identifier>,
