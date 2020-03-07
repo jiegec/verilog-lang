@@ -76,3 +76,18 @@ impl Parse for OutputDeclaration {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inout_declaration() {
+        let mut parser = Parser::from("inout wire [2:3] signal");
+        let m = InOutDeclaration::parse(&mut parser);
+        assert_eq!(
+            m.as_ref().unwrap().port_type.net_type.as_ref().unwrap(),
+            &NetType::Wire
+        );
+    }
+}
