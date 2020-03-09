@@ -24,8 +24,8 @@ impl Parse for Identifier {
             }
         } else {
             parser.err(
-                parser.location(),
-                parser.location(),
+                parser.location_from(),
+                parser.location_to(),
                 Message::UnexpectedToken(Token::Identifier, "end of file".to_owned()),
             );
         }

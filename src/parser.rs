@@ -52,8 +52,8 @@ impl<'a> Parser<'a> {
         };
         if !res {
             self.err(
-                self.location(),
-                self.location(),
+                self.location_from(),
+                self.location_to(),
                 Message::UnexpectedTokens(arr.to_owned(), self.current_text()),
             );
         }
@@ -72,9 +72,17 @@ impl<'a> Parser<'a> {
         self.index < self.tokens.len()
     }
 
-    pub(crate) fn location(&self) -> Location {
+    pub(crate) fn location_from(&self) -> Location {
         if self.index < self.tokens.len() {
             self.tokens[self.index].span.from
+        } else {
+            self.end_loc
+        }
+    }
+
+    pub(crate) fn location_to(&self) -> Location {
+        if self.index < self.tokens.len() {
+            self.tokens[self.index].span.to
         } else {
             self.end_loc
         }

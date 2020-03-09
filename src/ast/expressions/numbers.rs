@@ -26,8 +26,8 @@ impl Parse for Number {
             }
         } else {
             parser.err(
-                parser.location(),
-                parser.location(),
+                parser.location_from(),
+                parser.location_to(),
                 Message::UnexpectedToken(Token::Number, "end of file".to_owned()),
             );
         }
