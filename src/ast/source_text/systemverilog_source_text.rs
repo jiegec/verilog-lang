@@ -148,6 +148,26 @@ mod tests {
         let m = ModuleDeclaration::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().header.identifier.token, 1);
         assert_eq!(m.as_ref().unwrap().header.ports.ports.len(), 1);
+        assert_eq!(
+            m.as_ref().unwrap().header.ports.ports[0].1.direction,
+            Some(PortDirection::Output)
+        );
+        assert_eq!(
+            m.as_ref().unwrap().header.ports.ports[0]
+                .1
+                .net_port_type
+                .as_ref()
+                .unwrap()
+                .data_type_or_implicit,
+            DataTypeOrImplicit::Data(DataType {
+                integer_type: IntegerVectorType::Reg,
+                dimensions: vec![PackedDimension {
+                    from: Some(Number { token: 6 }),
+                    to: Some(Number { token: 8 })
+                }],
+                ..DataType::default()
+            })
+        );
         assert_eq!(m.as_ref().unwrap().items.len(), 0);
     }
 
