@@ -627,7 +627,6 @@ impl<'a> Lexer<'a> {
 
     // 2.7 Identifiers, keywords, and system names
     fn identifier_keyword(&mut self) -> bool {
-        // TODO: Escaped Identifiers
         lazy_static! {
             static ref KEYWORD: HashMap<String, Token> = keyword_map();
         }
@@ -658,6 +657,39 @@ impl<'a> Lexer<'a> {
         self.tokens.push(ParsedToken {
             span: Span { from, to: loc },
             token,
+            text: slice,
+        });
+        true
+    }
+
+    // 5.6.1 Escaped identifiers
+    fn escaped_identifier(&mut self) -> bool {
+        let mut cursor = self.cursor;
+        let from = self.loc;
+        let mut loc = self.loc;
+        while let Some((gc, next)) = cursor.next() {
+            match gc.base_char() {
+                ch if ch.is_whitespace() => {
+                    // end
+                    break;
+                }
+                _ => {
+                    cursor = next;
+                    loc.col += 1;
+                }
+            }
+        }
+
+        // end of input
+        let slice = self.cursor.slice_between(cursor).unwrap();
+
+        self.loc = loc;
+        loc.col -= 1;
+        self.cursor = cursor;
+
+        self.tokens.push(ParsedToken {
+            span: Span { from, to: loc },
+            token: Token::Identifier,
             text: slice,
         });
         true
@@ -762,6 +794,9 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 'a'..='z' | 'A'..='Z' | '_' if self.identifier_keyword() => {
+                    continue;
+                }
+                '\\' if self.escaped_identifier() => {
                     continue;
                 }
                 '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@'

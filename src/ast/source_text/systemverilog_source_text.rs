@@ -204,4 +204,45 @@ mod tests {
         let m = SourceText::parse(&mut parser);
         assert_eq!(m.as_ref().unwrap().modules.len(), 2);
     }
+
+    #[test]
+    fn netlist() {
+        let mut parser = Parser::from(
+            r#"
+module mod_top (
+    signal1,
+    signal1);
+input signal1;
+output [31:0] signal2;
+
+wire gnd;
+wire vcc;
+wire unknown;
+
+assign gnd = 1'b0;
+assign vcc = 1'b1;
+assign unknown = 1'bx;
+
+tri1 devclrn;
+tri1 devpor;
+tri1 devoe;
+
+wire \Add0~6_combout;
+
+cycloneii_lcell_comb \Add0~6 (
+    .dataa(signal1),
+    .datab(vcc),
+    .datac(vcc),
+    .datad(vcc),
+    .cin(\Add0~5),
+    .combout(\Add0~6_combout),
+    .cout(\Add0~7));
+defparam \Add0~6 .lut_mask = 16habab;
+defparam \Add0~6 .sum_lutc_input = "cin";
+endmodule "#,
+        );
+        let m = SourceText::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().modules.len(), 1);
+        assert_eq!(parser.get_diag().len(), 0);
+    }
 }
