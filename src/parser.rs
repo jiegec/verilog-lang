@@ -36,7 +36,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub(crate) fn probe(&self, arr: &[Token]) -> bool {
+    fn skip_comment(&mut self) {
+        while self.index < self.tokens.len() && self.tokens[self.index].token == Token::Comment {
+            self.index += 1;
+        }
+    }
+
+    pub(crate) fn probe(&mut self, arr: &[Token]) -> bool {
+        self.skip_comment();
         if self.index < self.tokens.len() {
             arr.contains(&self.tokens[self.index].token)
         } else {
@@ -45,6 +52,7 @@ impl<'a> Parser<'a> {
     }
 
     pub(crate) fn probe_err(&mut self, arr: &[Token]) -> bool {
+        self.skip_comment();
         let res = if self.index < self.tokens.len() {
             arr.contains(&self.tokens[self.index].token)
         } else {

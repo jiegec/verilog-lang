@@ -12,14 +12,14 @@ impl Parse for SourceText {
     fn parse(parser: &mut Parser<'_>) -> Option<Self> {
         let mut res = SourceText::default();
         while parser.avail() {
-            if parser.probe(&[Token::Comment]) {
-                parser.advance();
-                continue;
-            }
-            if let Some(module) = ModuleDeclaration::parse(parser) {
-                res.modules.push(module);
+            if parser.probe(&[Token::Module, Token::MacroModule]) {
+                if let Some(module) = ModuleDeclaration::parse(parser) {
+                    res.modules.push(module);
+                } else {
+                    break;
+                }
             } else {
-                break;
+                parser.advance();
             }
         }
         Some(res)
