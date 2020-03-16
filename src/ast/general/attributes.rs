@@ -54,6 +54,8 @@ impl Parse for Attribute {
                                 }
                                 parser.advance();
                                 return Some(res);
+                            } else {
+                                break;
                             }
                         }
                     }

@@ -245,4 +245,21 @@ endmodule "#,
         assert_eq!(m.as_ref().unwrap().modules.len(), 1);
         assert_eq!(parser.get_diag().len(), 0);
     }
+
+    #[test]
+    fn hang_regression() {
+        let mut parser = Parser::from(
+            r#"
+module mod_top (
+    signal1,
+    signal2);
+
+    always @ (*) begin
+    end
+endmodule "#,
+        );
+        let m = SourceText::parse(&mut parser);
+        assert_eq!(m.as_ref().unwrap().modules.len(), 1);
+        assert_eq!(parser.get_diag().len(), 0);
+    }
 }
