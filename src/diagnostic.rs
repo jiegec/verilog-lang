@@ -39,3 +39,13 @@ pub struct Diagnostic {
     pub msg: Message,
     pub severity: Severity,
 }
+
+impl fmt::Display for Diagnostic {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(
+            f,
+            "{:?} at ({}-{}): {}",
+            self.severity, self.pos.from, self.pos.to, self.msg
+        )
+    }
+}

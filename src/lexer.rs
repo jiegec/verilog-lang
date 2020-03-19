@@ -13,6 +13,12 @@ pub struct Location {
     pub col: usize,
 }
 
+impl std::fmt::Display for Location {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(f, "{}:{}", self.row, self.col)
+    }
+}
+
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct Span {
     pub from: Location,

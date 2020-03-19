@@ -262,4 +262,62 @@ endmodule "#,
         assert_eq!(m.as_ref().unwrap().modules.len(), 1);
         assert_eq!(parser.get_diag().len(), 0);
     }
+
+    #[test]
+    fn good_testcases() {
+        let entries = std::fs::read_dir("testcase/good")
+            .expect("list testcase/good")
+            .map(|res| res.map(|e| e.path()))
+            .collect::<Result<Vec<_>, std::io::Error>>()
+            .expect("list testcases/good");
+
+        for entry in entries {
+            use std::io::Read;
+
+            let mut file = std::fs::File::open(&entry).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            let mut parser = Parser::from(&content);
+            let m = SourceText::parse(&mut parser);
+            assert!(m.is_some(), "parsing failed for {:?}", entry);
+            assert_eq!(
+                parser.get_diag().len(),
+                0,
+                "got diag for {:?}: {:?}",
+                entry,
+                parser.get_diag()
+            );
+        }
+    }
+
+    #[test]
+    fn bad_testcases() {
+        let entries = std::fs::read_dir("testcase/bad")
+            .expect("list testcase/bad")
+            .map(|res| res.map(|e| e.path()))
+            .collect::<Result<Vec<_>, std::io::Error>>()
+            .expect("list testcases/bad");
+
+        for entry in entries {
+            use std::io::Read;
+
+            if !entry.to_str().expect("file name").ends_with(".v") {
+                continue;
+            }
+
+            let mut file = std::fs::File::open(&entry).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            let mut parser = Parser::from(&content);
+            let _ = SourceText::parse(&mut parser);
+            let mut expected = String::new();
+            for diag in parser.get_diag() {
+                expected.push_str(&format!("{}", diag));
+            }
+            let mut file = std::fs::File::open(format!("{}.diag", entry.display())).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            assert_eq!(expected, content);
+        }
+    }
 }

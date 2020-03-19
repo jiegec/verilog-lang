@@ -14,6 +14,8 @@ port_declaration ::= attribute_instance* inout_declaration | attribute_instance*
 
 // A.1.4
 module_item ::= port_declaration ';' | non_port_module_item;
+non_port_module_item ::= module_or_generate_item;
+module_or_generate_item = attribute_instance? module_instantiation;
 
 // A.2.1.2
 inout_declaration ::= 'inout' net_port_type list_of_port_identifiers;
