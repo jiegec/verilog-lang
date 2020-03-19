@@ -1,0 +1,192 @@
+SourceText {
+    modules: [
+        ModuleDeclaration {
+            header: ModuleHeader {
+                attributes: Attributes {
+                    attrs: [],
+                },
+                identifier: Identifier {
+                    token: 1,
+                },
+                ports: Ports {
+                    ports: [
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: None,
+                                net_port_type: None,
+                                identifier: Identifier {
+                                    token: 3,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: None,
+                                net_port_type: None,
+                                identifier: Identifier {
+                                    token: 5,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: None,
+                                net_port_type: None,
+                                identifier: Identifier {
+                                    token: 7,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: None,
+                                net_port_type: None,
+                                identifier: Identifier {
+                                    token: 9,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                    ],
+                },
+            },
+            items: [
+                Port(
+                    Input(
+                        Attributes {
+                            attrs: [],
+                        },
+                        InputDeclaration {
+                            port_type: NetPortType {
+                                net_type: Some(
+                                    Wire,
+                                ),
+                                data_type_or_implicit: ImplicitData(
+                                    ImplicitDataType {
+                                        sign: None,
+                                        dimensions: [],
+                                    },
+                                ),
+                            },
+                            identifiers: ListOfPortIdentifiers {
+                                ports: [
+                                    (
+                                        Identifier {
+                                            token: 14,
+                                        },
+                                        None,
+                                    ),
+                                ],
+                            },
+                        },
+                    ),
+                ),
+                Port(
+                    Input(
+                        Attributes {
+                            attrs: [],
+                        },
+                        InputDeclaration {
+                            port_type: NetPortType {
+                                net_type: Some(
+                                    Wire,
+                                ),
+                                data_type_or_implicit: ImplicitData(
+                                    ImplicitDataType {
+                                        sign: None,
+                                        dimensions: [],
+                                    },
+                                ),
+                            },
+                            identifiers: ListOfPortIdentifiers {
+                                ports: [
+                                    (
+                                        Identifier {
+                                            token: 18,
+                                        },
+                                        None,
+                                    ),
+                                ],
+                            },
+                        },
+                    ),
+                ),
+                Port(
+                    Output(
+                        Attributes {
+                            attrs: [],
+                        },
+                        OutputDeclaration {
+                            port_type: NetPortType {
+                                net_type: Some(
+                                    Wire,
+                                ),
+                                data_type_or_implicit: ImplicitData(
+                                    ImplicitDataType {
+                                        sign: None,
+                                        dimensions: [],
+                                    },
+                                ),
+                            },
+                            identifiers: ListOfPortIdentifiers {
+                                ports: [
+                                    (
+                                        Identifier {
+                                            token: 22,
+                                        },
+                                        None,
+                                    ),
+                                ],
+                            },
+                        },
+                    ),
+                ),
+                Port(
+                    Output(
+                        Attributes {
+                            attrs: [],
+                        },
+                        OutputDeclaration {
+                            port_type: NetPortType {
+                                net_type: Some(
+                                    Wire,
+                                ),
+                                data_type_or_implicit: ImplicitData(
+                                    ImplicitDataType {
+                                        sign: None,
+                                        dimensions: [],
+                                    },
+                                ),
+                            },
+                            identifiers: ListOfPortIdentifiers {
+                                ports: [
+                                    (
+                                        Identifier {
+                                            token: 26,
+                                        },
+                                        None,
+                                    ),
+                                ],
+                            },
+                        },
+                    ),
+                ),
+            ],
+        },
+    ],
+}

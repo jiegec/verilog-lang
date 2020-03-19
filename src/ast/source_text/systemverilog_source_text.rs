@@ -272,7 +272,7 @@ endmodule "#,
             .expect("list testcases/good");
 
         for entry in entries {
-            use std::io::Read;
+            use std::io::{Read, Write};
 
             let mut file = std::fs::File::open(&entry).unwrap();
             let mut content = String::new();
@@ -287,6 +287,15 @@ endmodule "#,
                 entry,
                 parser.get_diag()
             );
+            let actual = format!("{:#?}", m.unwrap());
+
+            let mut file = std::fs::File::open(format!("{}.ast", entry.display())).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            let mut file =
+                std::fs::File::create(format!("{}.ast.actual", entry.display())).unwrap();
+            write!(file, "{}", actual).expect("write to file");
+            assert_eq!(actual, content);
         }
     }
 
@@ -299,7 +308,7 @@ endmodule "#,
             .expect("list testcases/bad");
 
         for entry in entries {
-            use std::io::Read;
+            use std::io::{Read, Write};
 
             if !entry.to_str().expect("file name").ends_with(".v") {
                 continue;
@@ -310,14 +319,17 @@ endmodule "#,
             file.read_to_string(&mut content).unwrap();
             let mut parser = Parser::from(&content);
             let _ = SourceText::parse(&mut parser);
-            let mut expected = String::new();
+            let mut actual = String::new();
             for diag in parser.get_diag() {
-                expected.push_str(&format!("{}", diag));
+                actual.push_str(&format!("{}", diag));
             }
             let mut file = std::fs::File::open(format!("{}.diag", entry.display())).unwrap();
             let mut content = String::new();
             file.read_to_string(&mut content).unwrap();
-            assert_eq!(expected, content);
+            let mut file =
+                std::fs::File::create(format!("{}.diag.actual", entry.display())).unwrap();
+            write!(file, "{}", actual).expect("write to file");
+            assert_eq!(actual, content);
         }
     }
 }

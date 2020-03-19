@@ -1,0 +1,99 @@
+SourceText {
+    modules: [
+        ModuleDeclaration {
+            header: ModuleHeader {
+                attributes: Attributes {
+                    attrs: [],
+                },
+                identifier: Identifier {
+                    token: 1,
+                },
+                ports: Ports {
+                    ports: [
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: Some(
+                                    Input,
+                                ),
+                                net_port_type: Some(
+                                    NetPortType {
+                                        net_type: Some(
+                                            Wire,
+                                        ),
+                                        data_type_or_implicit: ImplicitData(
+                                            ImplicitDataType {
+                                                sign: None,
+                                                dimensions: [],
+                                            },
+                                        ),
+                                    },
+                                ),
+                                identifier: Identifier {
+                                    token: 5,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: Some(
+                                    Input,
+                                ),
+                                net_port_type: Some(
+                                    NetPortType {
+                                        net_type: Some(
+                                            Wire,
+                                        ),
+                                        data_type_or_implicit: ImplicitData(
+                                            ImplicitDataType {
+                                                sign: None,
+                                                dimensions: [],
+                                            },
+                                        ),
+                                    },
+                                ),
+                                identifier: Identifier {
+                                    token: 9,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: Some(
+                                    Output,
+                                ),
+                                net_port_type: Some(
+                                    NetPortType {
+                                        net_type: None,
+                                        data_type_or_implicit: Data(
+                                            DataType {
+                                                integer_type: Reg,
+                                                sign: None,
+                                                dimensions: [],
+                                            },
+                                        ),
+                                    },
+                                ),
+                                identifier: Identifier {
+                                    token: 13,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                    ],
+                },
+            },
+            items: [],
+        },
+    ],
+}
