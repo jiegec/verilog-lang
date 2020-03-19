@@ -358,6 +358,10 @@ fn keyword_map() -> HashMap<String, Token> {
     map
 }
 
+fn is_newline(ch: char) -> bool {
+    ch == '\r' || ch == '\n'
+}
+
 impl<'a> Lexer<'a> {
     pub fn lex(input: &'a str) -> Lexer<'a> {
         let mut lexer = Lexer {
@@ -400,7 +404,7 @@ impl<'a> Lexer<'a> {
                         let mut to = self.loc;
                         self.loc.col += 1;
                         while let Some((gc, next)) = cursor.next() {
-                            if gc.base_char() == '\n' {
+                            if is_newline(gc.base_char()) {
                                 break;
                             }
                             to = self.loc;
@@ -431,7 +435,7 @@ impl<'a> Lexer<'a> {
                                 });
                                 self.cursor = next;
                                 return true;
-                            } else if gc.base_char() == '\n' {
+                            } else if is_newline(gc.base_char()) {
                                 self.loc.row += 1;
                                 self.loc.col = 0;
                             } else {
@@ -772,7 +776,7 @@ impl<'a> Lexer<'a> {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
                 ch @ _ if ch.is_whitespace() => {
-                    if ch == '\n' {
+                    if is_newline(ch) {
                         self.loc.row += 1;
                         self.loc.col = 0;
                         self.cursor = next;
@@ -845,6 +849,15 @@ mod tests {
         assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
         assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 7 });
         assert_eq!(lexer.diag.len(), 1);
+    }
+
+    #[test]
+    fn crlf_newline() {
+        let lexer = Lexer::lex("/* woc woc\r\nsomething */");
+        assert_eq!(lexer.tokens.len(), 1);
+        assert_eq!(lexer.tokens[0].text, "/* woc woc\r\nsomething */");
+        assert_eq!(lexer.tokens[0].span.from, Location { row: 0, col: 0 });
+        assert_eq!(lexer.tokens[0].span.to, Location { row: 1, col: 11 });
     }
 
     #[test]

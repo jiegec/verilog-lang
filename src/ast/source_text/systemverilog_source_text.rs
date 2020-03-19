@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn source_text_comments() {
         let mut parser = Parser::from("// some comment");
-        let m = SourceText::parse(&mut parser);
+        let _ = SourceText::parse(&mut parser);
         assert_eq!(parser.get_diag().len(), 0);
     }
 
