@@ -274,6 +274,10 @@ endmodule "#,
         for entry in entries {
             use std::io::{Read, Write};
 
+            if !entry.ends_with(".v") {
+                continue;
+            }
+
             let mut file = std::fs::File::open(&entry).unwrap();
             let mut content = String::new();
             file.read_to_string(&mut content).unwrap();
