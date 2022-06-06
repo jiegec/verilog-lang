@@ -325,10 +325,6 @@ pub enum Token {
     OpRightShift,      // >>
     OpArithLeftShift,  // <<<
     OpArithRightShift, // >>>
-
-    // 5.10 Structure Literals
-    StructBegin, // '{
-    StructEnd,   // }
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
