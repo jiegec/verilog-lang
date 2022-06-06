@@ -2,19 +2,19 @@
 name = "verilog-lang"
 version = "0.1.0"
 authors = ["Jiajie Chen <noc@jiegec.ac.cn>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-strcursor = "0.2"
-regex = "1"
-lazy_static = "1.4"
-serde = { version = "1.0", features = ["derive"] }
+strcursor = "0.2.5"
+regex = "1.5.6"
+lazy_static = "1.4.0"
+serde = { version = "1.0.137", features = ["derive"] }
 
 [dev-dependencies]
-paw = "1.0"
-structopt = { version = "0.3", features = ["paw"] }
+paw = "1.0.0"
+structopt = { version = "0.3.26", features = ["paw"] }
 
 [[example]]
 name = "lex"
