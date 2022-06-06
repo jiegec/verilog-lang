@@ -274,7 +274,7 @@ endmodule "#,
         for entry in entries {
             use std::io::{Read, Write};
 
-            if !entry.ends_with(".v") {
+            if !entry.file_name().unwrap().to_str().unwrap().ends_with(".v") {
                 continue;
             }
 
@@ -284,13 +284,6 @@ endmodule "#,
             let mut parser = Parser::from(&content);
             let m = SourceText::parse(&mut parser);
             assert!(m.is_some(), "parsing failed for {:?}", entry);
-            assert_eq!(
-                parser.get_diag().len(),
-                0,
-                "got diag for {:?}: {:?}",
-                entry,
-                parser.get_diag()
-            );
             let actual = format!("{:#?}", m.unwrap());
 
             let mut file = std::fs::File::open(format!("{}.ast", entry.display())).unwrap();
@@ -300,6 +293,14 @@ endmodule "#,
                 std::fs::File::create(format!("{}.ast.actual", entry.display())).unwrap();
             write!(file, "{}", actual).expect("write to file");
             assert_eq!(actual, content);
+
+            assert_eq!(
+                parser.get_diag().len(),
+                0,
+                "got diag for {:?}: {:?}",
+                entry,
+                parser.get_diag()
+            );
         }
     }
 

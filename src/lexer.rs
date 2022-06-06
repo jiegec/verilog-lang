@@ -286,13 +286,14 @@ pub enum Token {
     RBracket,
     LBraces, // {}
     RBraces,
-    Colon,     // :
-    Comma,     // ,
-    Semicolon, // ;
-    Dot,       // .
-    Equal,     // =
-    At,        // @
-    Question,  // ?
+    Colon,      // :
+    Comma,      // ,
+    Semicolon,  // ;
+    Dot,        // .
+    Equal,      // =
+    At,         // @
+    Question,   // ?
+    Apostrophe, // '
 
     // Operators, Table 9
     OpPlus,            // +
@@ -324,6 +325,10 @@ pub enum Token {
     OpRightShift,      // >>
     OpArithLeftShift,  // <<<
     OpArithRightShift, // >>>
+
+    // 5.10 Structure Literals
+    StructBegin, // '{
+    StructEnd,   // }
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
@@ -722,6 +727,7 @@ impl<'a> Lexer<'a> {
                 '=' => Token::Equal,
                 '@' => Token::At,
                 '?' => Token::Question,
+                '\'' => Token::Apostrophe,
                 _ => return false,
             };
             self.tokens.push(ParsedToken {
@@ -810,7 +816,7 @@ impl<'a> Lexer<'a> {
                     continue;
                 }
                 '#' | '(' | ')' | '[' | ']' | '{' | '}' | ':' | ',' | ';' | '.' | '=' | '@'
-                | '?'
+                | '?' | '\''
                     if self.delimiter() =>
                 {
                     continue;

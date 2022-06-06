@@ -1,0 +1,34 @@
+SourceText {
+    modules: [
+        ModuleDeclaration {
+            header: ModuleHeader {
+                attributes: Attributes {
+                    attrs: [],
+                },
+                identifier: Identifier {
+                    token: 1,
+                },
+                ports: Ports {
+                    ports: [
+                        (
+                            Attributes {
+                                attrs: [],
+                            },
+                            Port {
+                                direction: Some(
+                                    Input,
+                                ),
+                                net_port_type: None,
+                                identifier: Identifier {
+                                    token: 4,
+                                },
+                                dimensions: [],
+                            },
+                        ),
+                    ],
+                },
+            },
+            items: [],
+        },
+    ],
+}
