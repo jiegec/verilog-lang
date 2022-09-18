@@ -8,9 +8,9 @@ edition = "2021"
 
 [dependencies]
 strcursor = "0.2.5"
-regex = "1.5.6"
+regex = "1.6.0"
 lazy_static = "1.4.0"
-serde = { version = "1.0.137", features = ["derive"] }
+serde = { version = "1.0.144", features = ["derive"] }
 
 [dev-dependencies]
 paw = "1.0.0"
