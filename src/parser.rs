@@ -124,7 +124,7 @@ impl<'a> Parser<'a> {
         &self.diag
     }
 
-    pub fn get_token(&self, index: usize) -> &ParsedToken {
+    pub fn get_token(&self, index: usize) -> &ParsedToken<'_> {
         &self.tokens[index]
     }
 }

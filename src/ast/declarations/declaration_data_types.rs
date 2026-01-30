@@ -35,17 +35,12 @@ impl Parse for DataType {
 
 /// # A.2.2.1 Net and variable types
 /// ## integer_vector_type ::= bit | logic | reg
-#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize, Default)]
 pub enum IntegerVectorType {
+    #[default]
     Bit,
     Logic,
     Reg,
-}
-
-impl Default for IntegerVectorType {
-    fn default() -> Self {
-        Self::Bit
-    }
 }
 
 impl Parse for IntegerVectorType {

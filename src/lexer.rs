@@ -347,21 +347,21 @@ fn keyword_map() -> HashMap<String, Token> {
     use Token::*;
     let mut map = HashMap::new();
     // TODO: all keywords
-    map.insert(format!("always"), Always);
-    map.insert(format!("always_comb"), AlwaysComb);
-    map.insert(format!("always_ff"), AlwaysFf);
-    map.insert(format!("and"), And);
-    map.insert(format!("assign"), Assign);
-    map.insert(format!("automatic"), Automatic);
-    map.insert(format!("endmodule"), EndModule);
-    map.insert(format!("logic"), Logic);
-    map.insert(format!("inout"), InOut);
-    map.insert(format!("input"), Input);
-    map.insert(format!("output"), Output);
-    map.insert(format!("module"), Module);
-    map.insert(format!("reg"), Reg);
-    map.insert(format!("signed"), Signed);
-    map.insert(format!("wire"), Wire);
+    map.insert("always".to_string(), Always);
+    map.insert("always_comb".to_string(), AlwaysComb);
+    map.insert("always_ff".to_string(), AlwaysFf);
+    map.insert("and".to_string(), And);
+    map.insert("assign".to_string(), Assign);
+    map.insert("automatic".to_string(), Automatic);
+    map.insert("endmodule".to_string(), EndModule);
+    map.insert("logic".to_string(), Logic);
+    map.insert("inout".to_string(), InOut);
+    map.insert("input".to_string(), Input);
+    map.insert("output".to_string(), Output);
+    map.insert("module".to_string(), Module);
+    map.insert("reg".to_string(), Reg);
+    map.insert("signed".to_string(), Signed);
+    map.insert("wire".to_string(), Wire);
     map
 }
 
@@ -606,7 +606,7 @@ impl<'a> Lexer<'a> {
                         ('n', true) | ('t', true) | ('\\', true) | ('"', true) => {
                             escaping = false;
                         }
-                        (ch, true) if ch >= '0' && ch <= '7' => {
+                        (ch, true) if ('0'..='7').contains(&ch) => {
                             escaping = false;
                         }
                         (ch, true) => {
@@ -783,7 +783,7 @@ impl<'a> Lexer<'a> {
     fn work(&mut self) {
         while let Some((gc, next)) = self.cursor.next() {
             match gc.base_char() {
-                ch @ _ if ch.is_whitespace() => {
+                ch if ch.is_whitespace() => {
                     if is_newline(ch) {
                         self.loc.row += 1;
                         self.loc.col = 0;
