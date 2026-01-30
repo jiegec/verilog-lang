@@ -1,21 +1,22 @@
+use clap::Parser;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use structopt::StructOpt;
-use verilog_lang::{ast::*, parser::Parser};
+use verilog_lang::ast::*;
+use verilog_lang::parser::Parser as VerilogParser;
 
-#[derive(StructOpt)]
+#[derive(Parser)]
 struct Args {
-    #[structopt(short, long)]
+    #[arg(short, long)]
     file: PathBuf,
 }
 
-#[paw::main]
-fn main(args: Args) {
+fn main() {
+    let args = Args::parse();
     let mut file = File::open(args.file).unwrap();
     let mut content = String::new();
     file.read_to_string(&mut content).unwrap();
-    let mut parser = Parser::from(&content);
+    let mut parser = VerilogParser::from(&content);
     let m = SourceText::parse(&mut parser);
     println!("{:?}", parser);
     println!("{:?}", m);

@@ -13,8 +13,7 @@ lazy_static = "1.4.0"
 serde = { version = "1.0.144", features = ["derive"] }
 
 [dev-dependencies]
-paw = "1.0.0"
-structopt = { version = "0.3.26", features = ["paw"] }
+clap = { version = "4.5", features = ["derive"] }
 
 [[example]]
 name = "lex"
